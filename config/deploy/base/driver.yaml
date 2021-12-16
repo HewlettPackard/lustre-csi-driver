@@ -1,0 +1,21 @@
+apiVersion: storage.k8s.io/v1
+kind: CSIDriver
+metadata:
+  name: csi.nnf.cray.hpe.com
+spec:
+  # Indicates this CSI volume driver requires an attach operation because it implements the CSI
+  # ControllerPublishVolume() method, and that the Kubernetes attach/detach controller should call
+  # the attach volume interface (which chekcs the volumeAttach status) and waits until the volume
+  # is attached before proceeding to mounting.
+  attachRequired: false
+
+  # Indicates this CSI volume driver requires additional pod information (i.e. PodName, PodUID, etc.)
+  # during mount operations. This CSI driver specifies podInfoOnMount as part of driver deployment.
+  # If true, Kubelet will pass pod information as VolumeContext in the CSI NodePublishVolume() calls.
+  # The CSI driver is responsible for parsing and validating the information passed as VolumeContext.
+  # The following information is presented, with a common prefix:
+  #    "csi.storage.k8s.io/pod.name": pod.Name
+  #    "csi.storage.k8s.io/pod.namespace": pod.Namespace
+  #    "csi.storage.k8s.io/pod.uid": string(pod.UID)
+  #    "csi.storage.k8s.io/ephemeral": "true" (or "false")
+  podInfoOnMount: false

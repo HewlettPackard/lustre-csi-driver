@@ -1,0 +1,10 @@
+namePrefix: lustre-
+bases:
+  - ../base
+patches:
+ - path: node_patch.yaml
+   target:
+    group: apps
+    version: v1
+    kind: DaemonSet
+    name: csi-nnf-node

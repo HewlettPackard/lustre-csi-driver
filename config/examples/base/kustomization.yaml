@@ -1,0 +1,5 @@
+resources:
+  - app.yaml
+  - pv.yaml
+  - pvc.yaml
+  - sc.yaml

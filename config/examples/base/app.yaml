@@ -1,0 +1,16 @@
+kind: Pod
+apiVersion: v1
+metadata:
+  name: app-example
+spec:
+  containers:
+  - name: busybox
+    image: busybox
+    command: [ "sleep", "100000000" ]
+    volumeMounts:
+      - name: nnf-volume
+        mountPath: /mnt/nnf
+  volumes:
+    - name: nnf-volume
+      persistentVolumeClaim:
+        claimName: pvc-example # defined in pvc.yaml

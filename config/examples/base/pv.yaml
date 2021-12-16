@@ -1,0 +1,23 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: pv-example
+spec:
+  capacity:
+    storage: 1Gi
+  volumeMode: Filesystem
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: nnf-storage-class-example
+  persistentVolumeReclaimPolicy: Recycle
+
+  # Represent the volume as managed by an external CSI volume driver
+  # https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.22/#csipersistentvolumesource-v1-core
+  csi:
+    # Driver is the name of the driver to use for this volume
+    driver: lustre.csi.nnf.cray.hpe.com
+    # VolumeHandle is the unique volume name returned by the CSI volume plugin's CreateVolume to refer to
+    # the volume on all subsequent calls
+    volumeHandle: "172.0.0.1@tcp:/maui"
+    # Filesystem type to mount. Must be a filesystem type supported by the host operating system. Ex. "ext4", "xfs", "ntfs".
+    fsType: lustre

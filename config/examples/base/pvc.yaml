@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: pvc-example
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: storage-class-example
+  volumeName: pv-example
+  resources:
+    requests:
+      storage: 1Gi
