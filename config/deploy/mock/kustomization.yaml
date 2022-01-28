@@ -7,4 +7,4 @@ patches:
     group: apps
     version: v1
     kind: DaemonSet
-    name: csi-nnf-node
+    name: csi-node

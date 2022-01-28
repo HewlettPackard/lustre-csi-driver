@@ -1,4 +1,3 @@
-namePrefix: lustre-
 bases:
   - ../base
 patches:
@@ -7,4 +6,8 @@ patches:
     group: apps
     version: v1
     kind: DaemonSet
-    name: csi-nnf-node
+    name: csi-node
+
+patchesStrategicMerge:
+  - volumes_patch.yaml
+

@@ -1,3 +1,20 @@
+# Adds namespace to all resources.
+namespace: nnf-system
+
+# Value of this field is prepended to the
+# names of all resources, e.g. a deployment named
+# "wordpress" becomes "alices-wordpress".
+# Note that it should also match with the prefix (text before '-') of the namespace
+# field above.
+namePrefix: nnf-
+
 resources:
-  - driver.yaml
-  - node.yaml
+- driver.yaml
+- node.yaml
+
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+images:
+- name: controller
+  newName: arti.dev.cray.com/rabsw-docker-master-local/cray-dp-lustre-csi-driver
+  newTag: 0.0.1

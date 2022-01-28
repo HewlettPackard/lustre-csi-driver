@@ -3,7 +3,7 @@
 kind: DaemonSet
 apiVersion: apps/v1
 metadata:
-  name: csi-nnf-node
+  name: csi-node
 spec:
   selector:
     matchLabels:
@@ -15,10 +15,15 @@ spec:
     spec:
       nodeSelector:
         cray.nnf.node: "true"
+      tolerations:
+      - key: "cray.nnf.node"
+        operator: "Equal"
+        value: "true"
+        effect: "NoSchedule"
       containers:
-        # NOTE: nnf-csi-driver must be listed first as the kustomization overlay assumes index zero
-        - name: nnf-csi-driver
-          image: arti.dev.cray.com/nnf-csi-driver:0.0.1
+        # NOTE: csi-node-driver must be listed first as the kustomization overlay assumes index zero
+        - name: csi-node-driver
+          image: controller:latest
           args:
            - --driver=
           securityContext:

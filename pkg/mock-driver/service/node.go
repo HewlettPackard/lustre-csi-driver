@@ -13,13 +13,13 @@ import (
 )
 
 func (s *service) NodeStageVolume(ctx context.Context, req *csi.NodeStageVolumeRequest) (*csi.NodeStageVolumeResponse, error) {
-	log.Tracef(">>> NodeStageVolume: VolumeId: %s TargetPath: %s", req.GetVolumeId())
+	log.Tracef(">>> NodeStageVolume: VolumeId: %s TargetPath: %s", req.GetVolumeId(), "")
 	defer log.Tracef("<<< NodeStageVolume")
 	return nil, nil
 }
 
 func (s *service) NodeUnstageVolume(ctx context.Context, req *csi.NodeUnstageVolumeRequest) (*csi.NodeUnstageVolumeResponse, error) {
-	log.Tracef(">>> NodeUnstageVolume: VolumeId: %s TargetPath: %s", req.GetVolumeId())
+	log.Tracef(">>> NodeUnstageVolume: VolumeId: %s TargetPath: %s", req.GetVolumeId(), "")
 	defer log.Tracef("<<< NodeUnstageVolume")
 
 	return nil, nil
@@ -65,14 +65,14 @@ func (s *service) NodeUnpublishVolume(ctx context.Context, req *csi.NodeUnpublis
 }
 
 func (s *service) NodeGetVolumeStats(ctx context.Context, req *csi.NodeGetVolumeStatsRequest) (*csi.NodeGetVolumeStatsResponse, error) {
-	log.Tracef(">>> NodeGetVolumeStats: VolumeId: %s TargetPath: %s", req.GetVolumeId())
+	log.Tracef(">>> NodeGetVolumeStats: VolumeId: %s TargetPath: %s", req.GetVolumeId(), "")
 	defer log.Tracef("<<< NodeGetVolumeStats")
 
 	return nil, nil
 }
 
 func (s *service) NodeExpandVolume(ctx context.Context, req *csi.NodeExpandVolumeRequest) (*csi.NodeExpandVolumeResponse, error) {
-	log.Tracef(">>> NodeExpandVolume: VolumeId: %s TargetPath: %s", req.GetVolumeId())
+	log.Tracef(">>> NodeExpandVolume: VolumeId: %s TargetPath: %s", req.GetVolumeId(), "")
 	defer log.Tracef("<<< NodeExpandVolume")
 
 	return nil, nil

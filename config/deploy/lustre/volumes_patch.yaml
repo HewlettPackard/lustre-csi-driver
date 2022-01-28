@@ -1,0 +1,63 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: csi-node
+spec:
+  template:
+    spec:
+      containers:
+      - name: csi-node-driver
+        volumeMounts:
+          - name: socket-dir
+            mountPath: /csi
+          - name: mount-dir
+            mountPath: /var/lib/kubelet/pods
+            mountPropagation: Bidirectional
+          - mountPath: /mnt
+            name: mnt-dir
+            mountPropagation: Bidirectional
+          - mountPath: /dev
+            name: dev-dir
+            mountPropagation: HostToContainer
+          - mountPath: /var/run/dbus
+            name: dbus-dir
+          - mountPath: /run/udev
+            name: udev-dir
+          - mountPath: /usr/sbin
+            name: usbin-dir
+          - mountPath: /usr/lib64
+            name: lib64-dir
+          - mountPath: /sys
+            name: sys-dir
+            mountPropagation: HostToContainer
+      volumes:
+        - name: socket-dir
+          hostPath:
+            path: /var/lib/kubelet/plugins/.csi.nnf.cray.hpe.com/
+            type: DirectoryOrCreate
+        - name: mount-dir
+          hostPath:
+            path: /var/lib/kubelet/pods/
+            type: Directory
+        - name: mnt-dir
+          hostPath:
+            path: /mnt
+        - name: dev-dir
+          hostPath:
+            path: /dev
+        - name: dbus-dir
+          hostPath:
+            path: /var/run/dbus
+        - name: usbin-dir
+          hostPath:
+            path: /usr/sbin
+        - name: lib64-dir
+          hostPath:
+            path: /usr/lib64
+        - name: sys-dir
+          hostPath:
+            path: /sys
+        - name: udev-dir
+          hostPath:
+            path: /run/udev
+
