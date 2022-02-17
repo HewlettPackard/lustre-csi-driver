@@ -1,17 +1,26 @@
-# Note: Editing this file might carry consequences, as key values are patched by kustomize. Please
-#       see the overlays {lustre,mock} for the path layout and assumptions
 kind: DaemonSet
 apiVersion: apps/v1
 metadata:
-  name: csi-node
+  name: lustre-csi-node
+  labels:
+    app.kubernetes.io/instance: lustre-csi.nnf.cray.hpe.com
+    app.kubernetes.io/part-of: lustre-csi-driver
+    app.kubernetes.io/name: lustre-csi-node
+    app.kubernetes.io/component: plugin
 spec:
   selector:
     matchLabels:
-      cray.nnf.node: "true"
+      app.kubernetes.io/instance: lustre-csi.nnf.cray.hpe.com
+      app.kubernetes.io/part-of: lustre-csi-driver
+      app.kubernetes.io/name: lustre-csi-node
+      app.kubernetes.io/component: plugin
   template:
     metadata:
       labels:
-        cray.nnf.node: "true"
+        app.kubernetes.io/instance: lustre-csi.nnf.cray.hpe.com
+        app.kubernetes.io/part-of: lustre-csi-driver
+        app.kubernetes.io/name: lustre-csi-node
+        app.kubernetes.io/component: plugin
     spec:
       nodeSelector:
         cray.nnf.node: "true"
@@ -25,7 +34,7 @@ spec:
         - name: csi-node-driver
           image: controller:latest
           args:
-           - --driver=
+           - --driver=mock
           securityContext:
             # This is necessary only for systems with SELinux, where the CSI driver needs
             # to mount the mount-dir with bidirectional mount propagation.
@@ -43,9 +52,14 @@ spec:
           volumeMounts:
             - name: socket-dir
               mountPath: /csi
-            - name: mount-dir
+            - name: mountpoint-dir
               mountPath: /var/lib/kubelet/pods
               mountPropagation: Bidirectional
+            - name: plugins-dir
+              mountPath: /var/lib/kubelet/plugins
+              mountPropagation: Bidirectional
+            - name: dev-dir
+              mountPath: /dev
 
         # The node-driver-registrar is a sidecar container that registers the CSI driver with Kubelet
         # using the kubelet plugin registration mechanism. This is necessary because Kubelet is
@@ -55,7 +69,7 @@ spec:
         #
         # NOTE: csi-node-driver-registrar must be listed second as the kustomization overlay assumes index one
         - name: csi-node-driver-registrar
-          image: k8s.gcr.io/sig-storage/csi-node-driver-registrar:v2.3.0
+          image: k8s.gcr.io/sig-storage/csi-node-driver-registrar:v2.5.0
           args:
             - --v=5
             - --csi-address=/csi/csi.sock
@@ -67,7 +81,7 @@ spec:
           env:
             # NOTE: CSI_DRIVER must be listed first as the kustomization overlay assumes index zero
             - name: CSI_DRIVER
-              value: .csi.nnf.cray.hpe.com
+              value: lustre-csi
             # TODO: Lookup why this is needed for the driver-registrar; I see it in the host-path driver
             # but there is no explination as to why the registrar needs it.
             - name: KUBE_NODE_NAME
@@ -86,20 +100,25 @@ spec:
         # NOTE: socket-dir must be listed first as the kustomization overlay assumes index zero
         - name: socket-dir
           hostPath:
-            path: /var/lib/kubelet/plugins/.csi.nnf.cray.hpe.com/
+            path: /var/lib/kubelet/plugins/lustre-csi
             type: DirectoryOrCreate
         # This volume is where the driver mounts volumes. Must be set to Bidirectional to allow kubelet on the host to see mounts created by the CSI driver container.
-        - name: mount-dir
+        - name: mountpoint-dir
           hostPath:
-            path: /var/lib/kubelet/pods/
+            path: /var/lib/kubelet/pods
             type: Directory
         # This volume is where the node-driver-registrar registers the plugin with kubelet
         - name: registration-dir
           hostPath:
-            path: /var/lib/kubelet/plugins_registry/
+            path: /var/lib/kubelet/plugins_registry
             type: Directory
         - name: plugins-dir
           hostPath:
-            path: /var/lib/kubelet/plugins/
+            path: /var/lib/kubelet/plugins
             type: Directory
-        
+        - name: dev-dir
+          hostPath:
+            path: /dev
+            type: Directory
+
+

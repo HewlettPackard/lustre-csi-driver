@@ -2,10 +2,11 @@ apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: pvc-example
+  namespace: nnf-lustre-bluster
 spec:
   accessModes:
     - ReadWriteOnce
-  storageClassName: storage-class-example
+  storageClassName: nnf-lustre-fs
   volumeName: pv-example
   resources:
     requests:

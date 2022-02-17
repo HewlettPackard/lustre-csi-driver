@@ -44,9 +44,18 @@ func (s *service) NodePublishVolume(
 	// ??? req.GetVolumeCapability()
 	// TODO: Check the FsType is supported by the driver
 
+	// This targetpath is deep down in /var/lib/kubelet/pods/....
+	// As k8s starts a pod that references this FS, that pod will have
+	// a spec.containers[].volumeMounts that tells k8s where to bind mount
+	// it into the pod's namespace.
+	err := os.MkdirAll(req.GetTargetPath(), 0755)
+	if err != nil && err != os.ErrExist {
+		return nil, status.Errorf(codes.Internal, "NodePublishVolume - Mountpoint mkdir Failed: Error %v", err)
+	}
+
 	// 2. Perform the mount
 	mounter := mount.New("")
-	err := mounter.Mount(
+	err = mounter.Mount(
 		req.GetVolumeId(),
 		req.GetTargetPath(),
 		req.GetVolumeCapability().GetMount().GetFsType(),

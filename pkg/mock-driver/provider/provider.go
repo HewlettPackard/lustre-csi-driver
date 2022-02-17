@@ -12,6 +12,7 @@ import (
 
 // New returns a new CSI Storage Plug-in Provider.
 func New() gocsi.StoragePluginProvider {
+	log.Info("Plugin mock provider")
 	svc := service.New()
 	return &gocsi.StoragePlugin{
 		Controller: svc,

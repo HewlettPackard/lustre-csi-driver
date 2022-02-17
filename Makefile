@@ -1,3 +1,7 @@
+# Default container tool to use.
+#   To use podman:
+#   $ DOCKER=podman make docker-build
+DOCKER ?= docker
 
 VERSION ?= $(shell sed 1q .version)
 IMAGE_TAG_BASE ?= arti.dev.cray.com/rabsw-docker-master-local/cray-dp-lustre-csi-driver
@@ -5,9 +9,10 @@ IMG ?= $(IMAGE_TAG_BASE):$(VERSION)
 
 # Tell Kustomize to deploy the default config, or an overlay.
 # To use the 'lustre' overlay:
-#   export KUBECONFIG=/my/craystack/kubeconfig.file
+#   export KUBECONFIG=/my/kubeconfig.file
 #   make deploy OVERLAY=lustre
-OVERLAY ?= base
+#
+OVERLAY ?= default
 
 all: build
 
@@ -25,19 +30,20 @@ run: fmt vet
 
 docker-build: Dockerfile fmt vet
 	# Name the base stages so they are not lost during a cache prune.
-	time docker build -t ${IMG}-base --target base .
-	time docker build -t ${IMG}-app-base --target application-base .
-	time docker build -t ${IMG} .
+	time ${DOCKER} build -t ${IMG}-base --target base .
+	time ${DOCKER} build -t ${IMG}-app-base --target application-base .
+	time ${DOCKER} build -t ${IMG} .
 
 kind-push:
-	kind load docker-image $(IMG)
+	# Push only to nodes labeled as rabbit nodes.
+	kind load docker-image --nodes `kubectl get node --no-headers -o custom-columns=:metadata.name -l cray.nnf.node=true | paste -d, -s -` $(IMG)
 
 deploy: kustomize ## Deploy controller to the K8s cluster specified in ~/.kube/config.
-	cd config/deploy/base && $(KUSTOMIZE) edit set image controller=${IMG}
-	$(KUSTOMIZE) build config/deploy/${OVERLAY} | kubectl apply -f -
+	cd config/default && $(KUSTOMIZE) edit set image controller=${IMG}
+	$(KUSTOMIZE) build config/$(OVERLAY) | kubectl apply -f -
 
 undeploy: ## Undeploy controller from the K8s cluster specified in ~/.kube/config.
-	$(KUSTOMIZE) build config/deploy/${OVERLAY} | kubectl delete -f -
+	$(KUSTOMIZE) build config/$(OVERLAY) | kubectl delete -f -
 
 KUSTOMIZE = $(shell pwd)/bin/kustomize
 kustomize: ## Download kustomize locally if necessary.

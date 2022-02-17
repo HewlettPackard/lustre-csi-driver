@@ -1,5 +1,5 @@
 resources:
+  - ns.yaml
   - app.yaml
   - pv.yaml
   - pvc.yaml
-  - sc.yaml

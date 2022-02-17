@@ -1,7 +1,14 @@
 apiVersion: storage.k8s.io/v1
 kind: CSIDriver
 metadata:
-  name: csi.nnf.cray.hpe.com
+  # This name must match the name of the CSI SP, found in service/service.go.
+  # Then any PV may reference this in its own spec.csi.driver.
+  name: lustre-csi.nnf.cray.hpe.com
+  labels:
+    app.kubernetes.io/instance: lustre-csi.nnf.cray.hpe.com
+    app.kubernetes.io/part-of: lustre-csi-driver
+    app.kubernetes.io/name: lustre-csi.nnf.cray.hpe.com
+    app.kubernetes.io/component: csi-driver
 spec:
   # Indicates this CSI volume driver requires an attach operation because it implements the CSI
   # ControllerPublishVolume() method, and that the Kubernetes attach/detach controller should call

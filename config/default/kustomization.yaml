@@ -1,16 +1,20 @@
 # Adds namespace to all resources.
-namespace: nnf-system
+namespace: nnf-csi-system
 
 # Value of this field is prepended to the
 # names of all resources, e.g. a deployment named
 # "wordpress" becomes "alices-wordpress".
 # Note that it should also match with the prefix (text before '-') of the namespace
 # field above.
-namePrefix: nnf-
+#namePrefix: nnf-
 
 resources:
+- ns.yaml
 - driver.yaml
-- node.yaml
+- plugin.yaml
+
+#patchesStrategicMerge:
+#- plugin_imagepullsecret_patch.yaml
 
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
