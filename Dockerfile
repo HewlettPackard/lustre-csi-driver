@@ -29,8 +29,7 @@ COPY --from=base /tmp/lustre-rpms/*.rpm /root/
 
 # Retrieve built rpms from previous layer and install Lustre dependencies
 WORKDIR /root/
-RUN dnf install -y epel-release libyaml net-snmp openmpi sg3_utils && \
-    dnf clean all && \
+RUN dnf clean all && \
     rpm -Uivh --nodeps lustre-* kmod-* && \
     rm /root/*.rpm
 
