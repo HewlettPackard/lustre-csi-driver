@@ -29,6 +29,17 @@ spec:
         operator: "Equal"
         value: "true"
         effect: "NoSchedule"
+      initContainers:
+        # When the CSI Driver hard crashes, it can leave around the socket used for communication between
+        # the driver and the registrar, causing future driver executables to fail as the unix socket is
+        # already in use (listen unix /csi/csi.sock: bind: address already in use). To combat this, we
+        # cleanup the socket, if present, on container init.
+        - name: init-socket
+          image: busybox:1.28
+          command: ['sh', '-c', 'rm -f /csi/csi.sock']
+          volumeMounts:
+            - name: socket-dir
+              mountPath: /csi
       containers:
         # NOTE: csi-node-driver must be listed first as the kustomization overlay assumes index zero
         - name: csi-node-driver
