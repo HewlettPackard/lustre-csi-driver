@@ -9,10 +9,10 @@ on:
 
 env:
   # HPE_BUILD_REPO represents the github repo path
-  HPE_BUILD_REPO: ${{github.repository}}
+  HPE_BUILD_REPO: hewlettpackard/lustre-csi-driver
   
   # HPE_DEPLOY_REPO represents the image repository path
-  HPE_DEPLOY_REPO: ${{github.repository}}
+  HPE_DEPLOY_REPO: hewlettpackard/lustre-csi-driver
   
   # TEST_TARGET: Name of the testing target in the Dockerfile
   TEST_TARGET: testing
