@@ -25,9 +25,9 @@ import (
 
 	"github.com/rexray/gocsi"
 
-	"github.hpe.com/hpe/hpc-rabsw-lustre-csi-driver/pkg/driver"
-	"github.hpe.com/hpe/hpc-rabsw-lustre-csi-driver/pkg/lustre-driver"
-	"github.hpe.com/hpe/hpc-rabsw-lustre-csi-driver/pkg/mock-driver"
+	"github.com/lustre-csi-driver/pkg/driver"
+	"github.com/lustre-csi-driver/pkg/lustre-driver"
+	"github.com/lustre-csi-driver/pkg/mock-driver"
 )
 
 // main is ignored when this package is built as a go plug-in.

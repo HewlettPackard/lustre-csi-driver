@@ -1,4 +1,4 @@
-module github.hpe.com/hpe/hpc-rabsw-lustre-csi-driver
+module github.com/lustre-csi-driver
 
 go 1.17
 
