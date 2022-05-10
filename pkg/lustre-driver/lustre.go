@@ -22,9 +22,9 @@ package lustre
 import (
 	"github.com/rexray/gocsi"
 
-	"github.hpe.com/hpe/hpc-rabsw-lustre-csi-driver/pkg/driver"
-	"github.hpe.com/hpe/hpc-rabsw-lustre-csi-driver/pkg/lustre-driver/provider"
-	"github.hpe.com/hpe/hpc-rabsw-lustre-csi-driver/pkg/lustre-driver/service"
+	"github.com/lustre-csi-driver/pkg/driver"
+	"github.com/lustre-csi-driver/pkg/lustre-driver/provider"
+	"github.com/lustre-csi-driver/pkg/lustre-driver/service"
 )
 
 func NewLustreDriver() driver.DriverApi {
