@@ -1,4 +1,5 @@
-FROM ghcr.io/billhpe/rhel-ubi8-lustre:latest AS base
+FROM ghcr.io/nearnodeflash/rhel-ubi8-lustre:latest AS base
+# FROM ghcr.io/billhpe/rhel-ubi8-lustre:latest AS base
 
 WORKDIR /
 
