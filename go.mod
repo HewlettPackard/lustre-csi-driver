@@ -1,4 +1,4 @@
-module github.com/lustre-csi-driver
+module github.com/hewlettpackard/lustre-csi-driver
 
 go 1.17
 
