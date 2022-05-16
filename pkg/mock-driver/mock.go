@@ -22,9 +22,9 @@ package mock
 import (
 	"github.com/rexray/gocsi"
 
-	"github.com/hewlettpackard/lustre-csi-driver/pkg/driver"
-	"github.com/hewlettpackard/lustre-csi-driver/pkg/mock-driver/provider"
-	"github.com/hewlettpackard/lustre-csi-driver/pkg/mock-driver/service"
+	"github.com/HewlettPackard/lustre-csi-driver/pkg/driver"
+	"github.com/HewlettPackard/lustre-csi-driver/pkg/mock-driver/provider"
+	"github.com/HewlettPackard/lustre-csi-driver/pkg/mock-driver/service"
 )
 
 func NewMockDriver() driver.DriverApi {

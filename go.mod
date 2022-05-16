@@ -1,4 +1,4 @@
-module github.com/hewlettpackard/lustre-csi-driver
+module github.com/HewlettPackard/lustre-csi-driver
 
 go 1.17
 

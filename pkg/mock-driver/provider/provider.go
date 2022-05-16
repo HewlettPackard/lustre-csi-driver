@@ -26,7 +26,7 @@ import (
 	"github.com/rexray/gocsi"
 	log "github.com/sirupsen/logrus"
 
-	"github.com/hewlettpackard/lustre-csi-driver/pkg/mock-driver/service"
+	"github.com/HewlettPackard/lustre-csi-driver/pkg/mock-driver/service"
 )
 
 // New returns a new CSI Storage Plug-in Provider.
