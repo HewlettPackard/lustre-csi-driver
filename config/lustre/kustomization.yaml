@@ -7,3 +7,7 @@ patches:
     version: v1
     kind: DaemonSet
     name: lustre-csi-node
+
+patchesStrategicMerge:
+# Let the node-manager daemonset mount host dirs for lustre tools and libs.
+- manager_volumes_patch.yaml

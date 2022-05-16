@@ -1,0 +1,43 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: lustre-csi-node
+spec:
+  template:
+    spec:
+      containers:
+      - name: csi-node-driver
+        volumeMounts:
+          - mountPath: /mnt
+            name: mnt-dir
+            mountPropagation: Bidirectional
+          - mountPath: /dev
+            name: dev-dir
+            mountPropagation: HostToContainer
+          - mountPath: /usr/bin
+            name: ubin-dir
+          - mountPath: /usr/sbin
+            name: usbin-dir
+          - mountPath: /usr/lib
+            name: ulib-dir
+          - mountPath: /usr/lib64
+            name: lib64-dir
+      volumes:
+        - name: mnt-dir
+          hostPath:
+            path: /mnt
+        - name: dev-dir
+          hostPath:
+            path: /dev
+        - name: ubin-dir
+          hostPath:
+            path: /usr/bin
+        - name: usbin-dir
+          hostPath:
+            path: /usr/sbin
+        - name: ulib-dir
+          hostPath:
+            path: /usr/lib
+        - name: lib64-dir
+          hostPath:
+            path: /usr/lib64
