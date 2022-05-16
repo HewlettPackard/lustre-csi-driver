@@ -49,8 +49,6 @@ run: fmt vet
 
 docker-build: Dockerfile fmt vet
 	# Name the base stages so they are not lost during a cache prune.
-	time ${DOCKER} build -t ${IMG}-base --target base .
-	time ${DOCKER} build -t ${IMG}-app-base --target application-base .
 	time ${DOCKER} build -t ${IMG} .
 
 kind-push:
