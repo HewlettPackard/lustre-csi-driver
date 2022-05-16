@@ -2,68 +2,67 @@ name: Docker build and push
 
 on:
   push:
-    branches: [ main ]
+    branches: [ master ]
   pull_request:
-    branches: [ main ]
+    branches: [ master ]
   workflow_dispatch:
 
 env:
-  # HPE_BUILD_REPO represents the github repo path
-  HPE_BUILD_REPO: ${{github.repository}}
-  
-  # HPE_DEPLOY_REPO represents the image repository path
-  HPE_DEPLOY_REPO: ${{github.repository}}
-  
   # TEST_TARGET: Name of the testing target in the Dockerfile
   TEST_TARGET: testing
-  
+
   # DO_TEST - true to build and run unit tests, false to skip the tests
+  # The docker test current fails on this project
   DO_TEST: false
-  
+
   # DO_PUSH - true to push to the HPE_DEPLOY_REPO, false to not push
-  DO_PUSH: false
-  
+  DO_PUSH: true
+
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
     - uses: actions/checkout@v2
-    
+
+    - name: Lowercase repository name for docker build
+      id: lowercase-repository-name
+      run: |
+        echo "HPE_BUILD_REPO=$(echo ${{ github.repository }} | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
+        echo "HPE_DEPLOY_REPO=$(echo ${{ github.repository }} | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
+
     - name: set TAG & TESTTAG for main/master
       if: ${{ github.event.repository.default_branch == 'main' || github.event.repository.default_branch == 'master' }}
       run: |
         echo "TAG=${{ github.sha }}" >> ${GITHUB_ENV}
         echo "LATESTTAG=latest" >> ${GITHUB_ENV}
         echo "TESTTAG=test-${{ github.sha }}" >> ${GITHUB_ENV}
-        
+
     - name: set TAG & TESTTAG for all other branches
       if: ${{ github.event.repository.default_branch != 'main' && github.event.repository.default_branch != 'master' }}
       run: |
         echo "TAG=dev-${{ github.sha }}" >> ${GITHUB_ENV}
         echo "LATESTTAG=dev-latest" >> ${GITHUB_ENV}
         echo "TESTTAG=test-${{ github.sha }}" >> ${GITHUB_ENV}
-        
+
     - name: Docker login
       uses: docker/login-action@v1
       with:
         registry: ghcr.io
         username: ${{ github.actor }}
-        password: ${{ secrets.GITHUB_TOKEN }}        
-        
+        password: ${{ secrets.GITHUB_TOKEN }}
+
     - name: Build the test Docker image
-      if: ${{ env.DO_TEST == 'true' }}    
+      if: ${{ env.DO_TEST == 'true' }}
       id: docker_build_test_target
       uses: docker/build-push-action@v2
       with:
         push: false
         target: ${{ env.TEST_TARGET }}
         tags: ${{ env.HPE_BUILD_REPO }}:${{ env.TESTTAG }}
-#        secrets: |
-#          "GH_HPETOKEN=${{ secrets.GH_HPETOKEN }}"    
-    
+
     - name: Run the Docker image unit tests
-      if: ${{ env.DO_TEST == 'true' }}    
+      if: ${{ env.DO_TEST == 'true' }}
       run: docker run ${HPE_BUILD_REPO}:${TESTTAG}
 
     - name: Build the final Docker image
@@ -72,15 +71,13 @@ jobs:
       with:
         push: false
         tags: ${{ env.HPE_BUILD_REPO }}:${{ env.TAG }}
-#        secrets: |
-#          "GH_HPETOKEN=${{ secrets.GH_HPETOKEN }}"    
-    
+
     - name: Tag the build
       run: docker tag docker.io/${HPE_BUILD_REPO}:${TAG} ghcr.io/${HPE_DEPLOY_REPO}:${TAG}
-      
+
     - name: Tag the build as latest
       run: docker tag ${HPE_BUILD_REPO}:${TAG} ghcr.io/${HPE_DEPLOY_REPO}:${LATESTTAG}
-      
+
     - name: Push the tagged build
       if: ${{ env.DO_PUSH == 'true' }}
       run: docker push ghcr.io/${HPE_DEPLOY_REPO}:${TAG}
