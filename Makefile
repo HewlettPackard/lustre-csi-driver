@@ -23,7 +23,7 @@
 DOCKER ?= docker
 
 VERSION ?= $(shell sed 1q .version)
-IMAGE_TAG_BASE ?= arti.dev.cray.com/rabsw-docker-master-local/cray-dp-lustre-csi-driver
+IMAGE_TAG_BASE ?= ghcr.io/hewlettpackard/cray-dp-lustre-csi-driver
 IMG ?= $(IMAGE_TAG_BASE):$(VERSION)
 
 # Tell Kustomize to deploy the default config, or an overlay.
