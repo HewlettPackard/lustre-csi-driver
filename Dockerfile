@@ -1,8 +1,5 @@
 FROM golang:1.17 as builder
 
-# Set Go environment
-ENV GOPRIVATE="github.hpe.com"
-
 WORKDIR /workspace
 
 # Copy the Go Modules manifests
