@@ -13,7 +13,7 @@ COPY vendor/ vendor/
 COPY config/ config/
 
 # Build
-RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -a -o nnf-csi-driver main.go
+RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -a -o lustre-csi-driver main.go
 
 ENTRYPOINT ["/bin/sh"]
 
@@ -34,7 +34,7 @@ FROM redhat/ubi8-minimal
 
 WORKDIR /
 # Retrieve executable from previous layer
-COPY --from=builder /workspace/nnf-csi-driver .
+COPY --from=builder /workspace/lustre-csi-driver .
 
-ENTRYPOINT ["/nnf-csi-driver"]
+ENTRYPOINT ["/lustre-csi-driver"]
 

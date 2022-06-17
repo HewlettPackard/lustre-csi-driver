@@ -2,23 +2,16 @@ kind: Pod
 apiVersion: v1
 metadata:
   name: app-example
-  namespace: nnf-lustre-bluster
+  namespace: lustre-bluster
 spec:
-  nodeSelector:
-    cray.nnf.node: "true"
-  tolerations:
-  - key: "cray.nnf.node"
-    operator: "Equal"
-    value: "true"
-    effect: "NoSchedule"
   containers:
   - name: busybox
     image: busybox
     command: [ "sleep", "100000000" ]
     volumeMounts:
-      - name: nnf-volume
-        mountPath: /mnt/nnf
+      - name: lustre-volume
+        mountPath: /mnt/lus
   volumes:
-    - name: nnf-volume
+    - name: lustre-volume
       persistentVolumeClaim:
         claimName: pvc-example # defined in pvc.yaml

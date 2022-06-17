@@ -25,7 +25,7 @@ import (
 
 const (
 	// Name is the name of this CSI SP.
-	Name = "lustre-csi.nnf.cray.hpe.com"
+	Name = "lustre-csi.hpe.com"
 
 	// VendorVersion is the version of this CSP SP.
 	VendorVersion = "v0.0.1"
