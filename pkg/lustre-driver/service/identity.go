@@ -25,7 +25,7 @@ import (
 	"github.com/container-storage-interface/spec/lib/go/csi"
 )
 
-func (s *service) GetPluginInfo(
+func (s *LustreService) GetPluginInfo(
 	ctx context.Context,
 	req *csi.GetPluginInfoRequest) (
 	*csi.GetPluginInfoResponse, error) {
@@ -36,7 +36,7 @@ func (s *service) GetPluginInfo(
 	}, nil
 }
 
-func (s *service) GetPluginCapabilities(
+func (s *LustreService) GetPluginCapabilities(
 	ctx context.Context,
 	req *csi.GetPluginCapabilitiesRequest) (
 	*csi.GetPluginCapabilitiesResponse, error) {
@@ -44,7 +44,7 @@ func (s *service) GetPluginCapabilities(
 	return &csi.GetPluginCapabilitiesResponse{}, nil
 }
 
-func (s *service) Probe(
+func (s *LustreService) Probe(
 	ctx context.Context,
 	req *csi.ProbeRequest) (
 	*csi.ProbeResponse, error) {

@@ -28,10 +28,10 @@ import (
 )
 
 func NewMockDriver() driver.DriverApi {
-	return &mockDriver{}
+	return &MockDriver{}
 }
 
-type mockDriver struct{}
+type MockDriver struct{}
 
-func (mockDriver) Name() string                                 { return service.Name }
-func (mockDriver) Provider() func() gocsi.StoragePluginProvider { return provider.New }
+func (MockDriver) Name() string                                 { return service.Name }
+func (MockDriver) Provider() func() gocsi.StoragePluginProvider { return provider.New }

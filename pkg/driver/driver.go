@@ -24,9 +24,10 @@ import (
 )
 
 type DriverApi interface {
-	// The name of the driver
+
+	// Name is the name of the driver
 	Name() string
 
-	// The storage provider allocator method of the driver
+	// Provider is the storage provider allocator method of the driver
 	Provider() func() gocsi.StoragePluginProvider
 }

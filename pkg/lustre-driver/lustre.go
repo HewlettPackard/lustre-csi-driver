@@ -28,10 +28,10 @@ import (
 )
 
 func NewLustreDriver() driver.DriverApi {
-	return &lustreDriver{}
+	return &LustreDriver{}
 }
 
-type lustreDriver struct{}
+type LustreDriver struct{}
 
-func (lustreDriver) Name() string                                 { return service.Name }
-func (lustreDriver) Provider() func() gocsi.StoragePluginProvider { return provider.New }
+func (LustreDriver) Name() string                                 { return service.Name }
+func (LustreDriver) Provider() func() gocsi.StoragePluginProvider { return provider.New }

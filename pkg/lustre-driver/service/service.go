@@ -31,16 +31,21 @@ const (
 	VendorVersion = "v0.0.1"
 )
 
-// Service is a CSI SP and idempotency.Provider.
+// Service is a CSI SP and idempotency.Provider
+// Contains 3 interface fields, each of which have a set of functions that must be implemented.
 type Service interface {
 	csi.ControllerServer
 	csi.IdentityServer
 	csi.NodeServer
 }
 
-type service struct{}
+// LustreService implements the Service interface.
+// All the inner interfaces' functions (ControllerServer, IdentityServer, and NodeServer)
+// are implemented as methods.
+type LustreService struct {
+}
 
 // New returns a new Service.
 func New() Service {
-	return &service{}
+	return &LustreService{}
 }

@@ -30,7 +30,7 @@ import (
 	"github.com/container-storage-interface/spec/lib/go/csi"
 )
 
-func (s *service) NodeStageVolume(
+func (s *LustreService) NodeStageVolume(
 	ctx context.Context,
 	req *csi.NodeStageVolumeRequest) (
 	*csi.NodeStageVolumeResponse, error) {
@@ -38,7 +38,7 @@ func (s *service) NodeStageVolume(
 	return nil, nil
 }
 
-func (s *service) NodeUnstageVolume(
+func (s *LustreService) NodeUnstageVolume(
 	ctx context.Context,
 	req *csi.NodeUnstageVolumeRequest) (
 	*csi.NodeUnstageVolumeResponse, error) {
@@ -46,12 +46,14 @@ func (s *service) NodeUnstageVolume(
 	return nil, nil
 }
 
-func (s *service) NodePublishVolume(
+// NodePublishVolume provides the core mounting functionality for a Lustre filesystem.
+// The context and request input params are provided by the calling Storage Plugin (SP).
+func (s *LustreService) NodePublishVolume(
 	ctx context.Context,
 	req *csi.NodePublishVolumeRequest) (
 	*csi.NodePublishVolumeResponse, error) {
 
-	// 1. Validate request
+	// Validate request
 	if req.GetVolumeId() == "" {
 		return nil, status.Errorf(codes.InvalidArgument, "NodePublishVolume - VolumeID is required")
 	}
@@ -60,19 +62,15 @@ func (s *service) NodePublishVolume(
 		return nil, status.Errorf(codes.InvalidArgument, "NodePublishVolume - TargetPath is required")
 	}
 
-	// ??? req.GetVolumeCapability()
-	// TODO: Check the FsType is supported by the driver
-
-	// This targetpath is deep down in /var/lib/kubelet/pods/....
-	// As k8s starts a pod that references this FS, that pod will have
-	// a spec.containers[].volumeMounts that tells k8s where to bind mount
-	// it into the pod's namespace.
+	// Example: For Kubernetes this target path is deep down in /var/lib/kubelet/pods/...
+	// A pod spec might define a spec.containers[].volumeMounts reference to this FS that
+	// tells k8s where to bind mount the FS into the pod's namespace.
 	err := os.MkdirAll(req.GetTargetPath(), 0755)
 	if err != nil && err != os.ErrExist {
 		return nil, status.Errorf(codes.Internal, "NodePublishVolume - Mountpoint mkdir Failed: Error %v", err)
 	}
 
-	// 2. Perform the mount
+	// Perform the mount
 	mounter := mount.New("")
 	err = mounter.Mount(
 		req.GetVolumeId(),
@@ -87,7 +85,7 @@ func (s *service) NodePublishVolume(
 	return &csi.NodePublishVolumeResponse{}, nil
 }
 
-func (s *service) NodeUnpublishVolume(
+func (s *LustreService) NodeUnpublishVolume(
 	ctx context.Context,
 	req *csi.NodeUnpublishVolumeRequest) (
 	*csi.NodeUnpublishVolumeResponse, error) {
@@ -110,7 +108,7 @@ func (s *service) NodeUnpublishVolume(
 	return &csi.NodeUnpublishVolumeResponse{}, nil
 }
 
-func (s *service) NodeGetVolumeStats(
+func (s *LustreService) NodeGetVolumeStats(
 	ctx context.Context,
 	req *csi.NodeGetVolumeStatsRequest) (
 	*csi.NodeGetVolumeStatsResponse, error) {
@@ -118,7 +116,7 @@ func (s *service) NodeGetVolumeStats(
 	return nil, nil
 }
 
-func (s *service) NodeExpandVolume(
+func (s *LustreService) NodeExpandVolume(
 	ctx context.Context,
 	req *csi.NodeExpandVolumeRequest) (
 	*csi.NodeExpandVolumeResponse, error) {
@@ -126,28 +124,15 @@ func (s *service) NodeExpandVolume(
 	return nil, nil
 }
 
-func (s *service) NodeGetCapabilities(
+func (s *LustreService) NodeGetCapabilities(
 	ctx context.Context,
 	req *csi.NodeGetCapabilitiesRequest) (
 	*csi.NodeGetCapabilitiesResponse, error) {
 
-	/*
-		return &csi.NodeGetCapabilitiesResponse{
-			Capabilities: []*csi.NodeServiceCapability{
-				{
-					Type: &csi.NodeServiceCapability_Rpc{
-						Rpc: &csi.NodeServiceCapability_RPC{
-							Type: csi.NodeServiceCapability_RPC_GET_VOLUME_STATS,
-						},
-					},
-				},
-			},
-		}, nil
-	*/
 	return &csi.NodeGetCapabilitiesResponse{}, nil
 }
 
-func (s *service) NodeGetInfo(
+func (s *LustreService) NodeGetInfo(
 	ctx context.Context,
 	req *csi.NodeGetInfoRequest) (
 	*csi.NodeGetInfoResponse, error) {
