@@ -3,32 +3,25 @@ apiVersion: apps/v1
 metadata:
   name: lustre-csi-node
   labels:
-    app.kubernetes.io/instance: lustre-csi.nnf.cray.hpe.com
+    app.kubernetes.io/instance: lustre-csi.hpe.com
     app.kubernetes.io/part-of: lustre-csi-driver
     app.kubernetes.io/name: lustre-csi-node
     app.kubernetes.io/component: plugin
 spec:
   selector:
     matchLabels:
-      app.kubernetes.io/instance: lustre-csi.nnf.cray.hpe.com
+      app.kubernetes.io/instance: lustre-csi.hpe.com
       app.kubernetes.io/part-of: lustre-csi-driver
       app.kubernetes.io/name: lustre-csi-node
       app.kubernetes.io/component: plugin
   template:
     metadata:
       labels:
-        app.kubernetes.io/instance: lustre-csi.nnf.cray.hpe.com
+        app.kubernetes.io/instance: lustre-csi.hpe.com
         app.kubernetes.io/part-of: lustre-csi-driver
         app.kubernetes.io/name: lustre-csi-node
         app.kubernetes.io/component: plugin
     spec:
-      nodeSelector:
-        cray.nnf.node: "true"
-      tolerations:
-      - key: "cray.nnf.node"
-        operator: "Equal"
-        value: "true"
-        effect: "NoSchedule"
       initContainers:
         # When the CSI Driver hard crashes, it can leave around the socket used for communication between
         # the driver and the registrar, causing future driver executables to fail as the unix socket is
@@ -131,5 +124,3 @@ spec:
           hostPath:
             path: /dev
             type: Directory
-
-

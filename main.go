@@ -32,7 +32,7 @@ import (
 
 // main is ignored when this package is built as a go plug-in.
 func main() {
-	var d = flag.String("driver", "lustre", "the nnf csi driver {lustre,mock} to execute")
+	var d = flag.String("driver", "lustre", "the Lustre CSI driver to execute: [\"lustre\", \"mock\"]")
 	flag.Parse()
 
 	drvr := newDriver(*d)

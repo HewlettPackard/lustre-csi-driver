@@ -1,0 +1,14 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: lustre-csi-node
+spec:
+  template:
+    spec:
+      nodeSelector:
+        cray.nnf.node: "true"
+      tolerations:
+      - key: "cray.nnf.node"
+        operator: "Equal"
+        value: "true"
+        effect: "NoSchedule"

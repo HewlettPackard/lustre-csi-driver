@@ -53,7 +53,7 @@ docker-build: Dockerfile fmt vet
 
 kind-push:
 	# Push only to nodes labeled as rabbit nodes.
-	kind load docker-image --nodes `kubectl get node --no-headers -o custom-columns=:metadata.name -l cray.nnf.node=true | paste -d, -s -` $(IMG)
+	kind load docker-image --nodes `kubectl get node --no-headers -o custom-columns=:metadata.name | paste -d, -s -` $(IMG)
 
 deploy: kustomize ## Deploy controller to the K8s cluster specified in ~/.kube/config.
 	cd config/default && $(KUSTOMIZE) edit set image controller=${IMG}
