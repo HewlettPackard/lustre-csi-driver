@@ -35,14 +35,14 @@ func main() {
 	var d = flag.String("driver", "lustre", "the Lustre CSI driver to execute: [\"lustre\", \"mock\"]")
 	flag.Parse()
 
-	drvr := newDriver(*d)
+	lustreDriver := newDriver(*d)
 
 	gocsi.Run(
 		context.Background(),
-		drvr.Name(),
+		lustreDriver.Name(),
 		"A description of the SP",
 		"",
-		drvr.Provider()(),
+		lustreDriver.Provider()(),
 	)
 }
 

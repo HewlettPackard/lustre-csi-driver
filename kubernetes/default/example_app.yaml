@@ -2,7 +2,6 @@ kind: Pod
 apiVersion: v1
 metadata:
   name: app-example
-  namespace: lustre-bluster
 spec:
   containers:
   - name: busybox

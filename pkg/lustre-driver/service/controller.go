@@ -25,7 +25,7 @@ import (
 	"github.com/container-storage-interface/spec/lib/go/csi"
 )
 
-func (s *LustreService) CreateVolume(
+func (s *service) CreateVolume(
 	ctx context.Context,
 	req *csi.CreateVolumeRequest) (
 	*csi.CreateVolumeResponse, error) {
@@ -33,7 +33,7 @@ func (s *LustreService) CreateVolume(
 	return nil, nil
 }
 
-func (s *LustreService) DeleteVolume(
+func (s *service) DeleteVolume(
 	ctx context.Context,
 	req *csi.DeleteVolumeRequest) (
 	*csi.DeleteVolumeResponse, error) {
@@ -41,7 +41,7 @@ func (s *LustreService) DeleteVolume(
 	return nil, nil
 }
 
-func (s *LustreService) ControllerPublishVolume(
+func (s *service) ControllerPublishVolume(
 	ctx context.Context,
 	req *csi.ControllerPublishVolumeRequest) (
 	*csi.ControllerPublishVolumeResponse, error) {
@@ -49,7 +49,7 @@ func (s *LustreService) ControllerPublishVolume(
 	return nil, nil
 }
 
-func (s *LustreService) ControllerUnpublishVolume(
+func (s *service) ControllerUnpublishVolume(
 	ctx context.Context,
 	req *csi.ControllerUnpublishVolumeRequest) (
 	*csi.ControllerUnpublishVolumeResponse, error) {
@@ -57,7 +57,7 @@ func (s *LustreService) ControllerUnpublishVolume(
 	return nil, nil
 }
 
-func (s *LustreService) ValidateVolumeCapabilities(
+func (s *service) ValidateVolumeCapabilities(
 	ctx context.Context,
 	req *csi.ValidateVolumeCapabilitiesRequest) (
 	*csi.ValidateVolumeCapabilitiesResponse, error) {
@@ -65,7 +65,7 @@ func (s *LustreService) ValidateVolumeCapabilities(
 	return nil, nil
 }
 
-func (s *LustreService) ListVolumes(
+func (s *service) ListVolumes(
 	ctx context.Context,
 	req *csi.ListVolumesRequest) (
 	*csi.ListVolumesResponse, error) {
@@ -73,14 +73,14 @@ func (s *LustreService) ListVolumes(
 	return nil, nil
 }
 
-func (s *LustreService) ControllerGetVolume(
+func (s *service) ControllerGetVolume(
 	ctx context.Context,
 	req *csi.ControllerGetVolumeRequest) (
 	*csi.ControllerGetVolumeResponse, error) {
 	return nil, nil
 }
 
-func (s *LustreService) GetCapacity(
+func (s *service) GetCapacity(
 	ctx context.Context,
 	req *csi.GetCapacityRequest) (
 	*csi.GetCapacityResponse, error) {
@@ -88,7 +88,7 @@ func (s *LustreService) GetCapacity(
 	return nil, nil
 }
 
-func (s *LustreService) ControllerGetCapabilities(
+func (s *service) ControllerGetCapabilities(
 	ctx context.Context,
 	req *csi.ControllerGetCapabilitiesRequest) (
 	*csi.ControllerGetCapabilitiesResponse, error) {
@@ -96,7 +96,7 @@ func (s *LustreService) ControllerGetCapabilities(
 	return nil, nil
 }
 
-func (s *LustreService) CreateSnapshot(
+func (s *service) CreateSnapshot(
 	ctx context.Context,
 	req *csi.CreateSnapshotRequest) (
 	*csi.CreateSnapshotResponse, error) {
@@ -104,7 +104,7 @@ func (s *LustreService) CreateSnapshot(
 	return nil, nil
 }
 
-func (s *LustreService) DeleteSnapshot(
+func (s *service) DeleteSnapshot(
 	ctx context.Context,
 	req *csi.DeleteSnapshotRequest) (
 	*csi.DeleteSnapshotResponse, error) {
@@ -112,7 +112,7 @@ func (s *LustreService) DeleteSnapshot(
 	return nil, nil
 }
 
-func (s *LustreService) ListSnapshots(
+func (s *service) ListSnapshots(
 	ctx context.Context,
 	req *csi.ListSnapshotsRequest) (
 	*csi.ListSnapshotsResponse, error) {
@@ -120,7 +120,7 @@ func (s *LustreService) ListSnapshots(
 	return nil, nil
 }
 
-func (s *LustreService) ControllerExpandVolume(
+func (s *service) ControllerExpandVolume(
 	ctx context.Context,
 	req *csi.ControllerExpandVolumeRequest) (
 	*csi.ControllerExpandVolumeResponse, error) {

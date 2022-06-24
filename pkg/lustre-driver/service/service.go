@@ -39,13 +39,13 @@ type Service interface {
 	csi.NodeServer
 }
 
-// LustreService implements the Service interface.
+// service implements the Service interface.
 // All the inner interfaces' functions (ControllerServer, IdentityServer, and NodeServer)
 // are implemented as methods.
-type LustreService struct {
+type service struct {
 }
 
 // New returns a new Service.
 func New() Service {
-	return &LustreService{}
+	return &service{}
 }

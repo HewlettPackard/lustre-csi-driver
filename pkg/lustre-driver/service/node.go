@@ -30,7 +30,7 @@ import (
 	"github.com/container-storage-interface/spec/lib/go/csi"
 )
 
-func (s *LustreService) NodeStageVolume(
+func (s *service) NodeStageVolume(
 	ctx context.Context,
 	req *csi.NodeStageVolumeRequest) (
 	*csi.NodeStageVolumeResponse, error) {
@@ -38,7 +38,7 @@ func (s *LustreService) NodeStageVolume(
 	return nil, nil
 }
 
-func (s *LustreService) NodeUnstageVolume(
+func (s *service) NodeUnstageVolume(
 	ctx context.Context,
 	req *csi.NodeUnstageVolumeRequest) (
 	*csi.NodeUnstageVolumeResponse, error) {
@@ -48,7 +48,7 @@ func (s *LustreService) NodeUnstageVolume(
 
 // NodePublishVolume provides the core mounting functionality for a Lustre filesystem.
 // The context and request input params are provided by the calling Storage Plugin (SP).
-func (s *LustreService) NodePublishVolume(
+func (s *service) NodePublishVolume(
 	ctx context.Context,
 	req *csi.NodePublishVolumeRequest) (
 	*csi.NodePublishVolumeResponse, error) {
@@ -85,7 +85,7 @@ func (s *LustreService) NodePublishVolume(
 	return &csi.NodePublishVolumeResponse{}, nil
 }
 
-func (s *LustreService) NodeUnpublishVolume(
+func (s *service) NodeUnpublishVolume(
 	ctx context.Context,
 	req *csi.NodeUnpublishVolumeRequest) (
 	*csi.NodeUnpublishVolumeResponse, error) {
@@ -108,7 +108,7 @@ func (s *LustreService) NodeUnpublishVolume(
 	return &csi.NodeUnpublishVolumeResponse{}, nil
 }
 
-func (s *LustreService) NodeGetVolumeStats(
+func (s *service) NodeGetVolumeStats(
 	ctx context.Context,
 	req *csi.NodeGetVolumeStatsRequest) (
 	*csi.NodeGetVolumeStatsResponse, error) {
@@ -116,7 +116,7 @@ func (s *LustreService) NodeGetVolumeStats(
 	return nil, nil
 }
 
-func (s *LustreService) NodeExpandVolume(
+func (s *service) NodeExpandVolume(
 	ctx context.Context,
 	req *csi.NodeExpandVolumeRequest) (
 	*csi.NodeExpandVolumeResponse, error) {
@@ -124,7 +124,7 @@ func (s *LustreService) NodeExpandVolume(
 	return nil, nil
 }
 
-func (s *LustreService) NodeGetCapabilities(
+func (s *service) NodeGetCapabilities(
 	ctx context.Context,
 	req *csi.NodeGetCapabilitiesRequest) (
 	*csi.NodeGetCapabilitiesResponse, error) {
@@ -132,7 +132,7 @@ func (s *LustreService) NodeGetCapabilities(
 	return &csi.NodeGetCapabilitiesResponse{}, nil
 }
 
-func (s *LustreService) NodeGetInfo(
+func (s *service) NodeGetInfo(
 	ctx context.Context,
 	req *csi.NodeGetInfoRequest) (
 	*csi.NodeGetInfoResponse, error) {
