@@ -1,3 +1,4 @@
+//go:build !linux && !windows
 // +build !linux,!windows
 
 /*
@@ -43,8 +44,18 @@ func (mounter *Mounter) Mount(source string, target string, fstype string, optio
 	return errUnsupported
 }
 
-// Mount always returns an error on unsupported platforms
+// MountSensitive always returns an error on unsupported platforms
 func (mounter *Mounter) MountSensitive(source string, target string, fstype string, options []string, sensitiveOptions []string) error {
+	return errUnsupported
+}
+
+// MountSensitiveWithoutSystemd always returns an error on unsupported platforms
+func (mounter *Mounter) MountSensitiveWithoutSystemd(source string, target string, fstype string, options []string, sensitiveOptions []string) error {
+	return errUnsupported
+}
+
+// MountSensitiveWithoutSystemdWithMountFlags always returns an error on unsupported platforms
+func (mounter *Mounter) MountSensitiveWithoutSystemdWithMountFlags(source string, target string, fstype string, options []string, sensitiveOptions []string, mountFlags []string) error {
 	return errUnsupported
 }
 
