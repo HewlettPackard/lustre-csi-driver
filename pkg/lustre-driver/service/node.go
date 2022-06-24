@@ -22,10 +22,11 @@ package service
 import (
 	"os"
 
+	log "github.com/sirupsen/logrus"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
-	"k8s.io/utils/mount"
+	mount "k8s.io/mount-utils"
 
 	"github.com/container-storage-interface/spec/lib/go/csi"
 )
@@ -82,6 +83,8 @@ func (s *service) NodePublishVolume(
 
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "NodePublishVolume - Mount Failed: Error %v", err)
+	} else {
+		log.WithField("source", req.GetVolumeId()).WithField("target", req.GetTargetPath()).Info("Mounted")
 	}
 
 	return &csi.NodePublishVolumeResponse{}, nil
@@ -101,10 +104,17 @@ func (s *service) NodeUnpublishVolume(
 	}
 
 	mounter := mount.New("")
-	err := mounter.Unmount(req.GetTargetPath())
-
+	notMountPoint, err := mount.IsNotMountPoint(mounter, req.GetTargetPath())
 	if err != nil {
-		return nil, status.Errorf(codes.Internal, "NodeUnpublishVolume - Unmount Failed: Error %v", err)
+		return nil, status.Errorf(codes.Internal, "NodeUnpublishVolume - Mount point check Failed: Error %v", err)
+	} else if !notMountPoint {
+		err := mounter.Unmount(req.GetTargetPath())
+
+		if err != nil {
+			return nil, status.Errorf(codes.Internal, "NodeUnpublishVolume - Unmount Failed: Error %v", err)
+		} else {
+			log.WithField("target", req.GetTargetPath()).Info("Unmounted")
+		}
 	}
 
 	return &csi.NodeUnpublishVolumeResponse{}, nil
