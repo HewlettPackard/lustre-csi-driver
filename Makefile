@@ -31,7 +31,7 @@ IMG ?= $(IMAGE_TAG_BASE):$(VERSION)
 #   export KUBECONFIG=/my/kubeconfig.file
 #   make deploy OVERLAY=lustre
 #
-OVERLAY ?= default
+OVERLAY ?= lustre
 
 all: build
 
