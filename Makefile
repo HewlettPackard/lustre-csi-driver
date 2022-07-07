@@ -15,8 +15,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-
-
 # Default container tool to use.
 #   To use podman:
 #   $ DOCKER=podman make docker-build
@@ -30,8 +28,7 @@ IMG ?= $(IMAGE_TAG_BASE):$(VERSION)
 # To use the 'lustre' overlay:
 #   export KUBECONFIG=/my/kubeconfig.file
 #   make deploy OVERLAY=lustre
-#
-OVERLAY ?= lustre
+
 
 all: build
 
@@ -51,16 +48,29 @@ docker-build: Dockerfile fmt vet
 	# Name the base stages so they are not lost during a cache prune.
 	time ${DOCKER} build -t ${IMG} .
 
-kind-push:
-	# Push only to nodes labeled as rabbit nodes.
-	kind load docker-image --nodes `kubectl get node --no-headers -o custom-columns=:metadata.name | paste -d, -s -` $(IMG)
+push-kind:
+	# Push image to Kind environment
+	kind load docker-image $(IMG)
 
-deploy: kustomize ## Deploy controller to the K8s cluster specified in ~/.kube/config.
+deploy_overlay: kustomize ## Deploy controller to the K8s cluster specified in ~/.kube/config.
 	cd config/default && $(KUSTOMIZE) edit set image controller=${IMG}
-	$(KUSTOMIZE) build config/$(OVERLAY) | kubectl apply -f -
+	#$(KUSTOMIZE) build config/$(OVERLAY) | kubectl apply -f -
+	$(KUSTOMIZE) build config/$(OVERLAY) > $(OVERLAY).yaml
 
-undeploy: ## Undeploy controller from the K8s cluster specified in ~/.kube/config.
+deploy: OVERLAY ?= lustre
+deploy: deploy_overlay
+
+deploy-kind: OVERLAY=kind
+deploy-kind: deploy_overlay
+
+undeploy_overlay: ## Undeploy controller from the K8s cluster specified in ~/.kube/config.
 	$(KUSTOMIZE) build config/$(OVERLAY) | kubectl delete -f -
+
+undeploy: OVERLAY ?= lustre
+undeploy: undeploy_overlay
+
+undeploy-kind: OVERLAY=kind
+undeploy-kind: undeploy_overlay
 
 KUSTOMIZE = $(shell pwd)/bin/kustomize
 kustomize: ## Download kustomize locally if necessary.
