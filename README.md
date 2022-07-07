@@ -1,8 +1,32 @@
-# NNF CSI Driver
+# Lustre CSI Driver
 
-CSI Driver for Near Node Flash
+## Overview
+
+This repository provides a [Lustre](https://www.lustre.org/) Container Storage Interface ([CSI](https://github.com/container-storage-interface/spec/blob/master/spec.md)), allowing Container Orchestration (CO)
+frameworks to mount and unmount Lustre filesystems to/from containers in their purview.
+
+## Features
+
+- **Static Provisioning** - Mount and unmount externally-created Lustre volumes within containers using Persistent
+  Volumes ([PV](https://kubernetes.io/docs/concepts/storage/persistent-volumes/)) and Persistent Volume Claims 
+  ([PVC](https://kubernetes.io/docs/concepts/storage/persistent-volumes/#PersistentVolumeClaim:~:text=PersistentVolumeClaim%20(PVC))).
+
+## Kubernetes Compatibility Matrix
+
+| Lustre CSI Driver / Kubernetes Version | v1.12 | v1.13 | v1.14 | v1.15 | v1.16 | v1.17 | v1.18+ |
+|----------------------------------------|-------|-------|-------|-------|-------|-------|--------|
+| v0.0.1                                 | no    | yes   | yes   | yes   | yes   | yes   | yes    |
+
 
 ## Deployment
+
+### Helm
+
+You can use Helm to manage the lustre CSI driver components:
+- To deploy: `helm install lustre-csi-driver lustre-csi-driver/ --values lustre-csi-driver/values.yaml`
+- To shut down: `helm delete lustre-csi-driver`
+
+### Kind
 
 Assuming the nnf-sos kind cluster is created...
 
@@ -22,17 +46,15 @@ kustomize build config/examples/mock | kubectl create -f -
 
 ## Manual Testing
 
-## Start NNF Driver
+Start NNF Driver:
 
 ```bash
 CSI_ENDPOINT=tcp://127.0.0.1:10000 ./nnf-csi-driver
 ```
 
-## Test NNF Driver using csc
+Test NNF Driver using csc: `https://github.com/rexray/gocsi/tree/master/csc`
 
-Get csc tool from `https://github.com/rexray/gocsi/tree/master/csc`
-
-### Get plugin info
+Get plugin info:
 
 ```bash
 csc identity plugin-info --endpoint tcp://127.0.0.1:10000
