@@ -22,6 +22,10 @@ spec:
             name: ulib-dir
           - mountPath: /usr/lib64
             name: lib64-dir
+          - mountPath: /bin
+            name: bin-dir
+          - mountPath: /sbin
+            name: sbin-dir
       volumes:
         - name: mnt-dir
           hostPath:
@@ -41,3 +45,9 @@ spec:
         - name: lib64-dir
           hostPath:
             path: /usr/lib64
+        - name: bin-dir
+          hostPath:
+            path: /bin
+        - name: sbin-dir
+          hostPath:
+            path: /sbin
