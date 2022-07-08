@@ -23,7 +23,7 @@ frameworks to mount and unmount Lustre filesystems to/from containers in their p
 ### Helm
 
 You can use Helm to manage the lustre CSI driver components:
-- To deploy: `helm install lustre-csi-driver lustre-csi-driver/ --values lustre-csi-driver/values.yaml`
+- To deploy: `cd charts/ && helm install lustre-csi-driver lustre-csi-driver/ --values lustre-csi-driver/values.yaml`
 - To shut down: `helm delete lustre-csi-driver`
 
 ### Kind
