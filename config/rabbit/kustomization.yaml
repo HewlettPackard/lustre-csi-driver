@@ -1,5 +1,0 @@
-bases:
-  - ../lustre
-
-patchesStrategicMerge:
-- manager_tolerations_patch.yaml

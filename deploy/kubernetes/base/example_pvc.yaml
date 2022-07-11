@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: pvc-example
+spec:
+  accessModes:
+    - ReadWriteOnce
+  # storageClassName for the PVC must match the corresponding PV's spec.storageClassName
+  storageClassName: lustre-fs
+  # volumeName for the PVC must match the corresponding PV's metadata.name
+  volumeName: pv-example
+  # Request the same amount (or less) as advertised by the PV
+  resources:
+    requests:
+      storage: 1Gi

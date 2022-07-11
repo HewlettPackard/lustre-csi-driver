@@ -2,11 +2,10 @@ kind: Pod
 apiVersion: v1
 metadata:
   name: app-example
-  namespace: lustre-bluster
 spec:
   containers:
   - name: busybox
-    image: busybox
+    image: busybox:1.28
     command: [ "sleep", "100000000" ]
     volumeMounts:
       - name: lustre-volume
