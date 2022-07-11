@@ -8,7 +8,6 @@
   * [Kubernetes](#kubernetes)
   * [Kind](#kind)
 - [Usage](#usage)
-- 
 
 ## Overview
 
