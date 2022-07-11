@@ -1,5 +1,15 @@
 # Lustre CSI Driver
 
+- [Overview](#overview)
+- [Features](#features)
+- [Kubernetes Compatibility Matrix](#kubernetes-compatibility-matrix)
+- [Deployment](#deployment)
+  * [Helm](#helm)
+  * [Kubernetes](#kubernetes)
+  * [Kind](#kind)
+- [Usage](#usage)
+- 
+
 ## Overview
 
 This repository provides a [Lustre](https://www.lustre.org/) Container Storage Interface ([CSI](https://github.com/container-storage-interface/spec/blob/master/spec.md)), allowing Container Orchestration (CO)
@@ -20,55 +30,40 @@ frameworks to mount and unmount Lustre filesystems to/from containers in their p
 
 ## Deployment
 
+This describes methods of deploying the Lustre CSI driver in various environments.
+
 ### Helm
 
 You can use Helm to manage the lustre CSI driver components:
 - To deploy: `cd charts/ && helm install lustre-csi-driver lustre-csi-driver/ --values lustre-csi-driver/values.yaml`
 - To shut down: `helm delete lustre-csi-driver`
 
+### Kubernetes
+
+Deployment uses [Kustomize](https://kustomize.io/) to configure the deployment YAMLs in the [kustomization base](https://kubernetes.io/docs/tasks/manage-kubernetes-objects/kustomization/#bases-and-overlays) 
+[deploy/kubernetes/base](./deploy/kubernetes/base).
+- To deploy using the Makefile: `make deploy`
+- To undeploy using the Makefile: `make undeploy`
+
 ### Kind
 
-Assuming the nnf-sos kind cluster is created...
+This assumes your [Kind](#https://kind.sigs.k8s.io/) environment is already set up and ready for a deployment.
+A Kind [kustomization overlay](https://kubernetes.io/docs/tasks/manage-kubernetes-objects/kustomization/#bases-and-overlays) is defined by the YAMLs in [deploy/kubernetes/kind](./deploy/kubernetes/kind).
+- To deploy using the Makefile: `make kind-push && make kind-deploy`
+- To undeploy using the Makefile: `make kind-undeploy`
 
-Deploy the {lustre,mock} DaemonSet and CSIDriver on the NNF Nodes
+## Usage
 
-```bash
-./node.sh create {lustre,mock}
-```
+This section provides examples for consuming a Lustre filesystem via a Kubernetes [PersistentVolume](https://kubernetes.io/docs/concepts/storage/persistent-volumes/) 
+(PV) and [PersistentVolumeClaim](https://kubernetes.io/docs/concepts/storage/persistent-volumes/#lifecycle-of-a-volume-and-claim) (PVC), 
+and finally an example of using the PVC in a simple application deployed as a Pod. 
 
-## Examples
+It assumed that a Lustre filesystem is already created and mounted on the underlying host OS, and that the Lustre CSI
+driver is deployed on your Kubernetes cluster wherever the application pods are running (see [Deployment](#deployment) for instructions).
 
-Deploy an example mock pod with volume mount /mnt/nnf
-
-```bash
-kustomize build config/examples/mock | kubectl create -f -
-```
-
-## Manual Testing
-
-Start NNF Driver:
-
-```bash
-CSI_ENDPOINT=tcp://127.0.0.1:10000 ./nnf-csi-driver
-```
-
-Test NNF Driver using csc: `https://github.com/rexray/gocsi/tree/master/csc`
-
-Get plugin info:
-
-```bash
-csc identity plugin-info --endpoint tcp://127.0.0.1:10000
-"nnf-csi-driver" "v0.0.1"
-```
-
-### NodePublish
-
-```bash
-csc node publish --cap ACCESS_MODE,ACCESS_TYPE[,FS_TYPE,MOUNT_FLAGS] --target-path TARGET_PATH VOLUME_ID [VOLUME_ID...]
-```
-
-Example
-
-```bash
-csc node publish --cap MULTI_NODE_MULTI_WRITER,mount,lustre --target-path=/mnt/fs1 rabbit-dev-01@tcp:/fs1 --endpoint tcp://127.0.0.1:10000
-```
+Inspect the `example_*.yaml` Kubernetes resources under [deploy/kubernetes/base](./deploy/kubernetes/base), then:
+1. Update [example_pv.yaml](./deploy/kubernetes/base/example_pv.yaml)'s `volumeHandle` value to the NID list of your Lustre filesystem's MGS.
+2. Deploy the PV:  `kubectl apply -f deploy/kubernetes/base/example_pv.yaml`
+3. Deploy the PVC: `kubectl apply -f deploy/kubernetes/base/example_pvc.yaml`
+4. Deploy the app: `kubectl apply -f deploy/kubernetes/base/example_app.yaml`
+   - Note: The lustre filesystem defaults to being mounted at `/mnt/lus` within the container. Update this in example_app.yaml if you desire a different location.
