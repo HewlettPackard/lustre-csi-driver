@@ -1,0 +1,165 @@
+kind: DaemonSet
+apiVersion: apps/v1
+metadata:
+  name: lustre-csi-node
+  namespace: lustre-csi-system
+  labels:
+    app.kubernetes.io/instance: lustre-csi.hpe.com
+    app.kubernetes.io/part-of: lustre-csi-driver
+    app.kubernetes.io/name: lustre-csi-node
+    app.kubernetes.io/component: plugin
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/instance: lustre-csi.hpe.com
+      app.kubernetes.io/part-of: lustre-csi-driver
+      app.kubernetes.io/name: lustre-csi-node
+      app.kubernetes.io/component: plugin
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/instance: lustre-csi.hpe.com
+        app.kubernetes.io/part-of: lustre-csi-driver
+        app.kubernetes.io/name: lustre-csi-node
+        app.kubernetes.io/component: plugin
+    spec:
+      initContainers:
+        # When the CSI Driver hard crashes, it can leave around the socket used for communication between
+        # the driver and the registrar, causing future driver executables to fail as the unix socket is
+        # already in use (listen unix /csi/csi.sock: bind: address already in use). To combat this, we
+        # cleanup the socket, if present, on container init.
+        - name: init-socket
+          image: busybox:1.28
+          command: ['sh', '-c', 'rm -f /csi/csi.sock']
+          volumeMounts:
+            - name: socket-dir
+              mountPath: /csi
+      containers:
+        - name: csi-node-driver
+          image: ghcr.io/hewlettpackard/lustre-csi-driver:a2a5154af23c7351ebd25cff0d2efe99bbd5e1dd
+          args:
+           - --driver=lustre
+          securityContext:
+            # This is necessary only for systems with SELinux, where the CSI driver needs
+            # to mount the mount-dir with bidirectional mount propagation.
+            privileged: true
+          imagePullPolicy: Always
+          env:
+            - name: CSI_ENDPOINT
+              value: unix:///csi/csi.sock
+            - name: X_CSI_DEBUG
+              value: "true"
+            - name: KUBE_NODE_NAME
+              valueFrom:
+                fieldRef:
+                  apiVersion: v1
+                  fieldPath: spec.nodeName
+          volumeMounts:
+            - name: socket-dir
+              mountPath: /csi
+            - name: mountpoint-dir
+              mountPath: /var/lib/kubelet/pods
+              mountPropagation: Bidirectional
+            - name: plugins-dir
+              mountPath: /var/lib/kubelet/plugins
+              mountPropagation: Bidirectional
+            - name: dev-dir
+              mountPath: /dev
+              mountPropagation: HostToContainer
+            - name: mnt-dir
+              mountPath: /mnt
+              mountPropagation: Bidirectional
+            - name: ubin-dir
+              mountPath: /usr/bin
+            - name: usbin-dir
+              mountPath: /usr/sbin
+            - name: ulib-dir
+              mountPath: /usr/lib
+            - name: ulib64-dir
+              mountPath: /usr/lib64
+            - name: sbin-dir
+              mountPath: /sbin
+            - name: bin-dir
+              mountPath: /bin
+
+        # The node-driver-registrar is a sidecar container that registers the CSI driver with Kubelet
+        # using the kubelet plugin registration mechanism. This is necessary because Kubelet is
+        # responsible for issuing CSI NodeGetInfo, NodeStageVolume, NodePublishVolume calls. The
+        # node-driver-registrar registers your CSI driver with Kubelet so that it knows which Unix
+        # domain socket to issue the CSI calls on.
+        - name: csi-node-driver-registrar
+          image: k8s.gcr.io/sig-storage/csi-node-driver-registrar:v2.5.0
+          args:
+            - --v=5
+            - --csi-address=/csi/csi.sock
+            - --kubelet-registration-path=/var/lib/kubelet/plugins/$(CSI_DRIVER)/csi.sock
+          securityContext:
+            # This is necessary only for systems with SELinux, where non-privileged sidecar containers
+            # cannot access unix domain socket created by privileged CSI driver container.
+            privileged: true
+          env:
+            - name: CSI_DRIVER
+              value: lustre-csi
+            - name: KUBE_NODE_NAME
+              valueFrom:
+                fieldRef:
+                  apiVersion: v1
+                  fieldPath: spec.nodeName
+          volumeMounts:
+            - name: socket-dir
+              mountPath: /csi
+            - name: registration-dir
+              mountPath: /registration
+
+      volumes:
+        # This volume is where the socket for the kubelet->driver communication is done.
+        - name: socket-dir
+          hostPath:
+            path: /var/lib/kubelet/plugins/lustre-csi
+            type: DirectoryOrCreate
+        # This volume is where the driver mounts volumes. Must be set to Bidirectional to allow kubelet on the host to see mounts created by the CSI driver container.
+        - name: mountpoint-dir
+          hostPath:
+            path: /var/lib/kubelet/pods
+            type: Directory
+        # This volume is where the node-driver-registrar registers the plugin with kubelet
+        - name: registration-dir
+          hostPath:
+            path: /var/lib/kubelet/plugins_registry
+            type: Directory
+        - name: plugins-dir
+          hostPath:
+            path: /var/lib/kubelet/plugins
+            type: Directory
+        - name: dev-dir
+          hostPath:
+            path: /dev
+            type: Directory
+        - name: mnt-dir
+          hostPath:
+            path: /mnt
+            type: Directory
+        - name: ubin-dir
+          hostPath:
+            path: /usr/bin
+            type: Directory
+        - name: usbin-dir
+          hostPath:
+            path: /usr/sbin
+            type: Directory
+        - name: ulib-dir
+          hostPath:
+            path: /usr/lib
+            type: Directory
+        - name: ulib64-dir
+          hostPath:
+            path: /usr/lib64
+            type: Directory
+        - name: sbin-dir
+          hostPath:
+            path: /sbin
+            type: Directory
+        - name: bin-dir
+          hostPath:
+            path: /bin
+            type: Directory
