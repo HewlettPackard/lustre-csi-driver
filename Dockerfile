@@ -5,7 +5,7 @@ WORKDIR /
 # Install basic dependencies
 RUN sed -i -e "s|mirrorlist=|#mirrorlist=|g" /etc/yum.repos.d/CentOS-*
 RUN sed -i -e "s|#baseurl=http://mirror.centos.org|baseurl=http://vault.centos.org|g" /etc/yum.repos.d/CentOS-*
-RUN dnf install -y make git gzip wget gcc tar
+RUN dnf install -y wget tar
 
 # Retrieve lustre-rpms
 WORKDIR /tmp/lustre-rpms
@@ -15,8 +15,6 @@ RUN wget https://downloads.whamcloud.com/public/lustre/lustre-2.14.0/el8.3/clien
   # http://arti.dev.cray.com/artifactory/kj-rpm-unstable-local/predev/centos8.4.2105-lustre-zfs/storage-mirrors/x86_64/kmod-lustre-2.14.0-1.el8.x86_64.rpm \
   # http://arti.dev.cray.com/artifactory/kj-rpm-unstable-local/predev/centos8.4.2105-lustre-zfs/storage-mirrors/x86_64/lustre-2.14.0-1.el8.x86_64.rpm
 
-ENV GO_VERSION=1.17.6
-RUN wget https://golang.org/dl/go${GO_VERSION}.linux-amd64.tar.gz && tar -xzf go${GO_VERSION}.linux-amd64.tar.gz
 
 # Start from scratch to make the base stage for the final application.
 # Build it here so it won't be invalidated when we COPY the controller source
@@ -43,8 +41,8 @@ ENTRYPOINT ["/bin/sh"]
 FROM base as builder
 
 # Install go
-RUN wget https://go.dev/dl/go1.17.6.linux-amd64.tar.gz
-RUN tar -C /usr/local -xzf go1.17.6.linux-amd64.tar.gz
+ENV GO_VERSION=1.17.6
+RUN wget https://golang.org/dl/go${GO_VERSION}.linux-amd64.tar.gz && tar -C /usr/local -xzf go${GO_VERSION}.linux-amd64.tar.gz
 
 # Set Go environment
 ENV PATH="${PATH}:/usr/local/go/bin" GOPRIVATE="github.hpe.com"
