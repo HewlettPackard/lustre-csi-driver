@@ -11,7 +11,6 @@ COPY go.sum go.sum
 COPY main.go main.go
 COPY pkg/ pkg/
 COPY vendor/ vendor/
-COPY config/ config/
 
 # Build
 RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -a -o lustre-csi-driver main.go
