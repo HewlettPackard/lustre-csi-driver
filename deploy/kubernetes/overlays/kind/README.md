@@ -12,6 +12,8 @@ Patches are applied to the [base configuration files](../../base), to delete the
 - `/usr/sbin`
 - `/usr/lib`
 - `/usr/lib64`
+- `/var/lib/kubelet/pods`
+- `/var/lib/kubelet/plugins`
 
 These are only used by a production lustre driver and may not be present in a testing environment.
 A patch is also applied to the container runtime argument for the `csi-node-driver`, setting `--driver=lustre` to 
