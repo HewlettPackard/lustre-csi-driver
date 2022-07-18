@@ -48,7 +48,7 @@ docker-build: Dockerfile fmt vet
 	# Name the base stages so they are not lost during a cache prune.
 	time ${DOCKER} build -t ${IMG} .
 
-push-kind:
+kind-push:
 	# Push image to Kind environment
 	kind load docker-image $(IMG)
 
