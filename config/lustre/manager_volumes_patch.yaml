@@ -14,18 +14,6 @@ spec:
           - mountPath: /dev
             name: dev-dir
             mountPropagation: HostToContainer
-          - mountPath: /usr/bin
-            name: ubin-dir
-          - mountPath: /usr/sbin
-            name: usbin-dir
-          - mountPath: /usr/lib
-            name: ulib-dir
-          - mountPath: /usr/lib64
-            name: lib64-dir
-          - mountPath: /bin
-            name: bin-dir
-          - mountPath: /sbin
-            name: sbin-dir
       volumes:
         - name: mnt-dir
           hostPath:
@@ -33,21 +21,3 @@ spec:
         - name: dev-dir
           hostPath:
             path: /dev
-        - name: ubin-dir
-          hostPath:
-            path: /usr/bin
-        - name: usbin-dir
-          hostPath:
-            path: /usr/sbin
-        - name: ulib-dir
-          hostPath:
-            path: /usr/lib
-        - name: lib64-dir
-          hostPath:
-            path: /usr/lib64
-        - name: bin-dir
-          hostPath:
-            path: /bin
-        - name: sbin-dir
-          hostPath:
-            path: /sbin

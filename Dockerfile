@@ -1,3 +1,4 @@
+# Builder stage for compiling go source code
 FROM golang:1.17 as builder
 
 WORKDIR /workspace
@@ -17,24 +18,17 @@ RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -a -o lustre-csi-driver main.
 
 ENTRYPOINT ["/bin/sh"]
 
-#FROM builder as testing
-#WORKDIR /workspace
-#
-#COPY Makefile .
-#
-#RUN go install sigs.k8s.io/controller-runtime/tools/setup-envtest@latest && \
-#    make manifests && make generate && make fmt &&  make vet && \
-#    mkdir -p /workspace/testbin && /bin/bash -c "test -f /workspace/testbin/setup-envtest.sh || curl -sSLo /workspace/testbin/setup-envtest.sh https://raw.githubusercontent.com/kubernetes-sigs/controller-runtime/v0.7.2/hack/setup-envtest.sh" && \
-#    /bin/bash -c "source /workspace/testbin/setup-envtest.sh; fetch_envtest_tools /workspace/testbin; setup_envtest_env /workspace/testbin"
-#
-#ENTRYPOINT ["bash", "/workspace/initiateContainerTest.sh"]
-
-# The final application stage.
-FROM redhat/ubi8-minimal
+# The final application stage, minimal image with compiled binary copied in
+# We're using openSUSE's bci-base image since it has the mount binary, and
+# is what we've built the Cray /sbin/mount.lustre user-space tool for.
+FROM registry.suse.com/bci/bci-base:latest
 
 WORKDIR /
 # Retrieve executable from previous layer
 COPY --from=builder /workspace/lustre-csi-driver .
 
-ENTRYPOINT ["/lustre-csi-driver"]
+# Add Cray-built mount.lustre binary to layer
+# See mount.lustre description in sbin/README.md
+COPY sbin/mount.lustre-cray /sbin/mount.lustre
 
+ENTRYPOINT ["/lustre-csi-driver"]
