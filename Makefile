@@ -59,8 +59,8 @@ deploy_overlay: kustomize ## Deploy controller to the K8s cluster specified in ~
 deploy: OVERLAY ?= lustre
 deploy: deploy_overlay
 
-deploy-kind: OVERLAY=kind
-deploy-kind: deploy_overlay
+kind-deploy: OVERLAY=kind
+kind-deploy: deploy_overlay
 
 undeploy_overlay: ## Undeploy controller from the K8s cluster specified in ~/.kube/config.
 	$(KUSTOMIZE) build config/$(OVERLAY) | kubectl delete -f -
@@ -68,8 +68,8 @@ undeploy_overlay: ## Undeploy controller from the K8s cluster specified in ~/.ku
 undeploy: OVERLAY ?= lustre
 undeploy: undeploy_overlay
 
-undeploy-kind: OVERLAY=kind
-undeploy-kind: undeploy_overlay
+kind-undeploy: OVERLAY=kind
+kind-undeploy: undeploy_overlay
 
 KUSTOMIZE = $(shell pwd)/bin/kustomize
 kustomize: ## Download kustomize locally if necessary.
