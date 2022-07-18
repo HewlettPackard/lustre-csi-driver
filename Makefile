@@ -54,8 +54,7 @@ push-kind:
 
 deploy_overlay: kustomize ## Deploy controller to the K8s cluster specified in ~/.kube/config.
 	cd config/default && $(KUSTOMIZE) edit set image controller=${IMG}
-	#$(KUSTOMIZE) build config/$(OVERLAY) | kubectl apply -f -
-	$(KUSTOMIZE) build config/$(OVERLAY) > $(OVERLAY).yaml
+	$(KUSTOMIZE) build config/$(OVERLAY) | kubectl apply -f -
 
 deploy: OVERLAY ?= lustre
 deploy: deploy_overlay
