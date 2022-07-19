@@ -46,8 +46,8 @@ Deployment uses [Kustomize](https://kustomize.io/) to configure the deployment Y
 
 ### Kind
 
-This assumes your [Kind](#https://kind.sigs.k8s.io/) environment is already set up and ready for a deployment.
-A Kind [kustomization overlay](https://kubernetes.io/docs/tasks/manage-kubernetes-objects/kustomization/#bases-and-overlays) is defined by the YAMLs in [deploy/kubernetes/kind](./deploy/kubernetes/kind).
+This assumes your [Kind](https://kind.sigs.k8s.io/) environment is already set up and ready for a deployment.
+A Kind [kustomization overlay](https://kubernetes.io/docs/tasks/manage-kubernetes-objects/kustomization/#bases-and-overlays) is defined by the YAMLs in [deploy/kubernetes/overlays/kind](./deploy/kubernetes/overlays/kind).
 - To deploy using the Makefile: `make kind-push && make kind-deploy`
 - To undeploy using the Makefile: `make kind-undeploy`
 
