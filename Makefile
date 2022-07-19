@@ -25,10 +25,12 @@ IMAGE_TAG_BASE ?= ghcr.io/hewlettpackard/lustre-csi-driver
 IMG ?= $(IMAGE_TAG_BASE):$(VERSION)
 
 # Tell Kustomize to deploy the default config, or an overlay.
-# To use the 'lustre' overlay:
+# To use the 'kind' overlay:
 #   export KUBECONFIG=/my/kubeconfig.file
-#   make deploy OVERLAY=lustre
-
+#   make deploy OVERLAY=overlays/kind
+# Or, make kind-deploy
+# To deploy the base lustre config:
+#   make deploy
 
 all: build
 
@@ -53,22 +55,22 @@ kind-push:
 	kind load docker-image $(IMG)
 
 deploy_overlay: kustomize ## Deploy controller to the K8s cluster specified in ~/.kube/config.
-	cd config/default && $(KUSTOMIZE) edit set image controller=${IMG}
-	$(KUSTOMIZE) build config/$(OVERLAY) | kubectl apply -f -
+	cd deploy/kubernetes/base && $(KUSTOMIZE) edit set image controller=${IMG}
+	$(KUSTOMIZE) build deploy/kubernetes/$(OVERLAY) | kubectl apply -f -
 
-deploy: OVERLAY ?= lustre
+deploy: OVERLAY ?= base
 deploy: deploy_overlay
 
-kind-deploy: OVERLAY=kind
+kind-deploy: OVERLAY=overlays/kind
 kind-deploy: deploy_overlay
 
 undeploy_overlay: ## Undeploy controller from the K8s cluster specified in ~/.kube/config.
-	$(KUSTOMIZE) build config/$(OVERLAY) | kubectl delete -f -
+	$(KUSTOMIZE) build deploy/kubernetes/$(OVERLAY) | kubectl delete -f -
 
 undeploy: OVERLAY ?= lustre
 undeploy: undeploy_overlay
 
-kind-undeploy: OVERLAY=kind
+kind-undeploy: OVERLAY=overlays/kind
 kind-undeploy: undeploy_overlay
 
 KUSTOMIZE = $(shell pwd)/bin/kustomize

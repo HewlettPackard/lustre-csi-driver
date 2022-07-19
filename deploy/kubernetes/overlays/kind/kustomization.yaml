@@ -1,65 +1,8 @@
 # Use the base config files as our foundation
 resources:
   - ../../base
-
-# Deletes volume mounts from the plugin.yaml base config DaemonSet.
-# The Kind environment does not have volume access to the /dev, /mnt, /usr/bin, /usr/sbin, /usr/lib, /usr/lib64
-# directories on the host that are used by the lustre client.
-patchesStrategicMerge:
-  - |-
-    apiVersion: apps/v1
-    kind: DaemonSet
-    metadata:
-      name: lustre-csi-node
-    spec:
-      template:
-        spec:
-          volumes:
-            - name: mountpoint-dir
-              $patch: delete
-            - name: plugins-dir
-              $patch: delete
-            - name: dev-dir
-              $patch: delete
-            - name: mnt-dir
-              $patch: delete
-            - name: ubin-dir
-              $patch: delete
-            - name: usbin-dir
-              $patch: delete
-            - name: ulib-dir
-              $patch: delete
-            - name: ulib64-dir
-              $patch: delete
-            - name: sbin-dir
-              $patch: delete
-            - name: bin-dir
-              $patch: delete
-          containers:
-            - name: csi-node-driver
-              volumeMounts:
-                - name: mountpoint-dir
-                  $patch: delete
-                - name: plugins-dir
-                  $patch: delete
-                - name: dev-dir
-                  $patch: delete
-                - name: mnt-dir
-                  $patch: delete
-                - name: ubin-dir
-                  $patch: delete
-                - name: usbin-dir
-                  $patch: delete
-                - name: ulib-dir
-                  $patch: delete
-                - name: ulib64-dir
-                  $patch: delete
-                - name: sbin-dir
-                  $patch: delete
-                - name: bin-dir
-                  $patch: delete
                   
-                  # Patches the base config plugin.yaml DaemonSet to set the container argument --driver=lustre to --driver=mock.
+# Patches the base config plugin.yaml DaemonSet to set the container argument --driver=lustre to --driver=mock.
 # This ensures the container starts as a mock driver, instead of a production lustre driver.
 patches:
   - patch: |-
