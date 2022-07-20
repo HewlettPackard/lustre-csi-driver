@@ -47,7 +47,6 @@ run: fmt vet
 	go run ./main.go
 
 docker-build: Dockerfile fmt vet
-	# Name the base stages so they are not lost during a cache prune.
 	time ${DOCKER} build -t $(IMG) .
 
 edit-image: ## Replace plugin.yaml image with name "controller" -> $IMG variable
