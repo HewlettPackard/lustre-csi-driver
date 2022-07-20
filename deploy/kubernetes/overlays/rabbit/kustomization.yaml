@@ -1,0 +1,6 @@
+# Use the base config files as our foundation
+resources:
+  - ../../base
+
+patchesStrategicMerge:
+  - manager_tolerations_patch.yaml
