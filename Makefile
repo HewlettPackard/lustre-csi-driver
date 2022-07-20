@@ -48,14 +48,15 @@ run: fmt vet
 
 docker-build: Dockerfile fmt vet
 	# Name the base stages so they are not lost during a cache prune.
-	time ${DOCKER} build -t ${IMG} .
+	time ${DOCKER} build -t $(IMG) .
 
-kind-push:
-	# Push image to Kind environment
+edit-image: ## Replace plugin.yaml image with name "controller" -> $IMG variable
+	cd deploy/kubernetes/base && $(KUSTOMIZE) edit set image controller=$(IMG)
+
+kind-push: ## Push image to Kind environment
 	kind load docker-image $(IMG)
 
-deploy_overlay: kustomize ## Deploy controller to the K8s cluster specified in ~/.kube/config.
-	cd deploy/kubernetes/base && $(KUSTOMIZE) edit set image controller=${IMG}
+deploy_overlay: kustomize edit-image ## Deploy controller to the K8s cluster specified in ~/.kube/config.
 	$(KUSTOMIZE) build deploy/kubernetes/$(OVERLAY) | kubectl apply -f -
 
 deploy: OVERLAY ?= base
@@ -64,7 +65,7 @@ deploy: deploy_overlay
 kind-deploy: OVERLAY=overlays/kind
 kind-deploy: deploy_overlay
 
-undeploy_overlay: ## Undeploy controller from the K8s cluster specified in ~/.kube/config.
+undeploy_overlay: kustomize ## Undeploy controller from the K8s cluster specified in ~/.kube/config.
 	$(KUSTOMIZE) build deploy/kubernetes/$(OVERLAY) | kubectl delete -f -
 
 undeploy: OVERLAY ?= lustre
@@ -72,6 +73,12 @@ undeploy: undeploy_overlay
 
 kind-undeploy: OVERLAY=overlays/kind
 kind-undeploy: undeploy_overlay
+
+installer-gen: kustomize edit-image
+	$(KUSTOMIZE) build deploy/kubernetes/$(OVERLAY) > deploy/kubernetes/lustre-csi-driver$(OVERLAY_LABEL).yaml
+
+installer: ## Generates full .yaml output from Kustomize for base and overlays
+	make installer-gen OVERLAY=base && make installer-gen OVERLAY=overlays/kind OVERLAY_LABEL=-kind
 
 KUSTOMIZE = $(shell pwd)/bin/kustomize
 kustomize: ## Download kustomize locally if necessary.
