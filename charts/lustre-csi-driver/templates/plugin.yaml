@@ -36,7 +36,7 @@ spec:
               mountPath: /csi
       containers:
         - name: csi-node-driver
-          image: ghcr.io/hewlettpackard/lustre-csi-driver:a2a5154af23c7351ebd25cff0d2efe99bbd5e1dd
+          image: ghcr.io/hewlettpackard/lustre-csi-driver:latest
           args:
            - --driver=lustre
           securityContext:
@@ -69,18 +69,6 @@ spec:
             - name: mnt-dir
               mountPath: /mnt
               mountPropagation: Bidirectional
-            - name: ubin-dir
-              mountPath: /usr/bin
-            - name: usbin-dir
-              mountPath: /usr/sbin
-            - name: ulib-dir
-              mountPath: /usr/lib
-            - name: ulib64-dir
-              mountPath: /usr/lib64
-            - name: sbin-dir
-              mountPath: /sbin
-            - name: bin-dir
-              mountPath: /bin
 
         # The node-driver-registrar is a sidecar container that registers the CSI driver with Kubelet
         # using the kubelet plugin registration mechanism. This is necessary because Kubelet is
@@ -138,28 +126,4 @@ spec:
         - name: mnt-dir
           hostPath:
             path: /mnt
-            type: Directory
-        - name: ubin-dir
-          hostPath:
-            path: /usr/bin
-            type: Directory
-        - name: usbin-dir
-          hostPath:
-            path: /usr/sbin
-            type: Directory
-        - name: ulib-dir
-          hostPath:
-            path: /usr/lib
-            type: Directory
-        - name: ulib64-dir
-          hostPath:
-            path: /usr/lib64
-            type: Directory
-        - name: sbin-dir
-          hostPath:
-            path: /sbin
-            type: Directory
-        - name: bin-dir
-          hostPath:
-            path: /bin
             type: Directory

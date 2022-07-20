@@ -34,15 +34,15 @@ spec:
             - name: socket-dir
               mountPath: /csi
       containers:
-        # NOTE: csi-node-driver must be listed first as the kustomization overlay assumes index zero
         - name: csi-node-driver
           image: controller:latest
           args:
-           - --driver=mock
+            - --driver=lustre
           securityContext:
             # This is necessary only for systems with SELinux, where the CSI driver needs
             # to mount the mount-dir with bidirectional mount propagation.
             privileged: true
+          imagePullPolicy: Always
           env:
             - name: CSI_ENDPOINT
               value: unix:///csi/csi.sock
@@ -64,14 +64,16 @@ spec:
               mountPropagation: Bidirectional
             - name: dev-dir
               mountPath: /dev
+              mountPropagation: HostToContainer
+            - name: mnt-dir
+              mountPath: /mnt
+              mountPropagation: Bidirectional
 
         # The node-driver-registrar is a sidecar container that registers the CSI driver with Kubelet
         # using the kubelet plugin registration mechanism. This is necessary because Kubelet is
         # responsible for issuing CSI NodeGetInfo, NodeStageVolume, NodePublishVolume calls. The
         # node-driver-registrar registers your CSI driver with Kubelet so that it knows which Unix
         # domain socket to issue the CSI calls on.
-        #
-        # NOTE: csi-node-driver-registrar must be listed second as the kustomization overlay assumes index one
         - name: csi-node-driver-registrar
           image: k8s.gcr.io/sig-storage/csi-node-driver-registrar:v2.5.0
           args:
@@ -79,15 +81,12 @@ spec:
             - --csi-address=/csi/csi.sock
             - --kubelet-registration-path=/var/lib/kubelet/plugins/$(CSI_DRIVER)/csi.sock
           securityContext:
-            # This is necessary only for systems with SELinux, where non-privileged sidcar containers
+            # This is necessary only for systems with SELinux, where non-privileged sidecar containers
             # cannot access unix domain socket created by privileged CSI driver container.
             privileged: true
           env:
-            # NOTE: CSI_DRIVER must be listed first as the kustomization overlay assumes index zero
             - name: CSI_DRIVER
               value: lustre-csi
-            # TODO: Lookup why this is needed for the driver-registrar; I see it in the host-path driver
-            # but there is no explination as to why the registrar needs it.
             - name: KUBE_NODE_NAME
               valueFrom:
                 fieldRef:
@@ -101,7 +100,6 @@ spec:
 
       volumes:
         # This volume is where the socket for the kubelet->driver communication is done.
-        # NOTE: socket-dir must be listed first as the kustomization overlay assumes index zero
         - name: socket-dir
           hostPath:
             path: /var/lib/kubelet/plugins/lustre-csi
@@ -123,4 +121,8 @@ spec:
         - name: dev-dir
           hostPath:
             path: /dev
+            type: Directory
+        - name: mnt-dir
+          hostPath:
+            path: /mnt
             type: Directory

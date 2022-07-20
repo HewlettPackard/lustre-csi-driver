@@ -1,0 +1,16 @@
+# Use the base config files as our foundation
+resources:
+  - ../../base
+                  
+# Patches the base config plugin.yaml DaemonSet to set the container argument --driver=lustre to --driver=mock.
+# This ensures the container starts as a mock driver, instead of a production lustre driver.
+patches:
+  - patch: |-
+      - op: replace
+        path: /spec/template/spec/containers/0/args/0
+        value: --driver=mock
+    target:
+      group: apps
+      version: v1
+      kind: DaemonSet
+      name: lustre-csi-node

@@ -25,10 +25,12 @@ IMAGE_TAG_BASE ?= ghcr.io/hewlettpackard/lustre-csi-driver
 IMG ?= $(IMAGE_TAG_BASE):$(VERSION)
 
 # Tell Kustomize to deploy the default config, or an overlay.
-# To use the 'lustre' overlay:
+# To use the 'kind' overlay:
 #   export KUBECONFIG=/my/kubeconfig.file
-#   make deploy OVERLAY=lustre
-
+#   make deploy OVERLAY=overlays/kind
+# Or, make kind-deploy
+# To deploy the base lustre config:
+#   make deploy
 
 all: build
 
@@ -45,31 +47,37 @@ run: fmt vet
 	go run ./main.go
 
 docker-build: Dockerfile fmt vet
-	# Name the base stages so they are not lost during a cache prune.
-	time ${DOCKER} build -t ${IMG} .
+	time ${DOCKER} build -t $(IMG) .
 
-kind-push:
-	# Push image to Kind environment
+edit-image: ## Replace plugin.yaml image with name "controller" -> $IMG variable
+	cd deploy/kubernetes/base && $(KUSTOMIZE) edit set image controller=$(IMG)
+
+kind-push: ## Push image to Kind environment
 	kind load docker-image $(IMG)
 
-deploy_overlay: kustomize ## Deploy controller to the K8s cluster specified in ~/.kube/config.
-	cd config/default && $(KUSTOMIZE) edit set image controller=${IMG}
-	$(KUSTOMIZE) build config/$(OVERLAY) | kubectl apply -f -
+deploy_overlay: kustomize edit-image ## Deploy controller to the K8s cluster specified in ~/.kube/config.
+	$(KUSTOMIZE) build deploy/kubernetes/$(OVERLAY) | kubectl apply -f -
 
-deploy: OVERLAY ?= lustre
+deploy: OVERLAY ?= base
 deploy: deploy_overlay
 
-kind-deploy: OVERLAY=kind
+kind-deploy: OVERLAY=overlays/kind
 kind-deploy: deploy_overlay
 
-undeploy_overlay: ## Undeploy controller from the K8s cluster specified in ~/.kube/config.
-	$(KUSTOMIZE) build config/$(OVERLAY) | kubectl delete -f -
+undeploy_overlay: kustomize ## Undeploy controller from the K8s cluster specified in ~/.kube/config.
+	$(KUSTOMIZE) build deploy/kubernetes/$(OVERLAY) | kubectl delete -f -
 
 undeploy: OVERLAY ?= lustre
 undeploy: undeploy_overlay
 
-kind-undeploy: OVERLAY=kind
+kind-undeploy: OVERLAY=overlays/kind
 kind-undeploy: undeploy_overlay
+
+installer-gen: kustomize edit-image
+	$(KUSTOMIZE) build deploy/kubernetes/$(OVERLAY) > deploy/kubernetes/lustre-csi-driver$(OVERLAY_LABEL).yaml
+
+installer: ## Generates full .yaml output from Kustomize for base and overlays
+	make installer-gen OVERLAY=base && make installer-gen OVERLAY=overlays/kind OVERLAY_LABEL=-kind
 
 KUSTOMIZE = $(shell pwd)/bin/kustomize
 kustomize: ## Download kustomize locally if necessary.
