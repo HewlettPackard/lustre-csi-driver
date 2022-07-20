@@ -44,6 +44,12 @@ Deployment uses [Kustomize](https://kustomize.io/) to configure the deployment Y
 - To deploy using the Makefile: `make deploy`
 - To undeploy using the Makefile: `make undeploy`
 
+To deploy a specific [overlay](./deploy/kubernetes/overlays):
+- `make deploy OVERLAY=overlays/<overlay>`
+
+Otherwise, you can just use the pre-built .yaml files in [deploy/kubernetes](./deploy/kubernetes):
+- `kubectl apply -f https://raw.githubusercontent.com/HewlettPackard/lustre-csi-driver/master/deploy/kubernetes/lustre-csi-driver.yaml`
+
 ### Kind
 
 This assumes your [Kind](https://kind.sigs.k8s.io/) environment is already set up and ready for a deployment.
