@@ -76,7 +76,7 @@ spec:
         # node-driver-registrar registers your CSI driver with Kubelet so that it knows which Unix
         # domain socket to issue the CSI calls on.
         - name: csi-node-driver-registrar
-          image: k8s.gcr.io/sig-storage/csi-node-driver-registrar:v2.5.0
+          image: registry.k8s.io/sig-storage/csi-node-driver-registrar:v2.5.0
           args:
             - --v=5
             - --csi-address=/csi/csi.sock
