@@ -1,6 +1,6 @@
 module github.com/HewlettPackard/lustre-csi-driver
 
-go 1.17
+go 1.19
 
 require (
 	github.com/container-storage-interface/spec v1.5.0
