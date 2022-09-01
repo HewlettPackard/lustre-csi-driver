@@ -7,14 +7,14 @@ spec:
     storage: 1Gi
   volumeMode: Filesystem
   accessModes:
-    - ReadWriteOnce
+    - ReadWriteMany
   storageClassName: lustre-fs
   persistentVolumeReclaimPolicy: Retain
   # Reserve this PV for the matching PVC.
   claimRef:
     kind: PersistentVolumeClaim
     name: pvc-example
-    namespace: lustre-csi-system
+    namespace: default
   # Represent the volume as managed by an external CSI volume driver
   # https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.22/#csipersistentvolumesource-v1-core
   csi:

@@ -4,7 +4,7 @@ metadata:
   name: pvc-example
 spec:
   accessModes:
-    - ReadWriteOnce
+    - ReadWriteMany
   # storageClassName for the PVC must match the corresponding PV's spec.storageClassName
   storageClassName: lustre-fs
   # volumeName for the PVC must match the corresponding PV's metadata.name
