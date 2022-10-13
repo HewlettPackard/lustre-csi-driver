@@ -63,7 +63,7 @@ This section provides examples for consuming a Lustre filesystem via a Kubernete
 (PV) and [PersistentVolumeClaim](https://kubernetes.io/docs/concepts/storage/persistent-volumes/#lifecycle-of-a-volume-and-claim) (PVC), 
 and finally an example of using the PVC in a simple application deployed as a Pod. 
 
-It assumed that a Lustre filesystem is already created, and that the Lustre CSIk
+It assumed that a Lustre filesystem is already created, and that the Lustre CSI
 driver is deployed on your Kubernetes cluster wherever the application pods are running (see [Deployment](#deployment) for instructions).
 
 Inspect the `example_*.yaml` Kubernetes resources under [deploy/kubernetes/base](./deploy/kubernetes/base), then:
