@@ -22,7 +22,29 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
+
+    - name: "Check git dir"
+      run: |
+        ls -ld .git/
+        git log -20
+        echo "XXXXXXXXXXXXXXXXXXXXXXX"
+        git tag -l
+        echo "XXXXXXXXXXXXXXXXXXXXXXX"
+        git show v0.0.1
+        echo "XXXXXXXXXXXXXXXXXXXXXXX"
+        git describe
+
+#    - name: "Repair tag"
+#      run: git fetch -f origin ${{ github.ref }}:${{ github.ref }}
+
+#    - name: "Verify tag is annotated"
+#      run: |
+#        echo "XXXXXXXXXXXXXXXXXXXXXXX"
+#        echo "GITHUB_REF=${{ github.ref }}"
+#        if test x$(git for-each-ref ${{ github.ref }} | awk '{print $2}') = xtag; then /bin/true; else echo "\"${{ github.ref }}\" does not look like an annotated tag!"; /bin/false; fi
 
     - name: Lowercase repository name for docker build
       id: lowercase-repository-name
@@ -31,18 +53,13 @@ jobs:
         echo "HPE_DEPLOY_REPO=$(echo ${{ github.repository }} | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
 
     - name: set TAG & TESTTAG for main/master
-      if: ${{ github.event.repository.default_branch == 'main' || github.event.repository.default_branch == 'master' }}
       run: |
-        echo "TAG=${{ github.sha }}" >> ${GITHUB_ENV}
+        echo "TAG=$(./git-version-gen)" >> ${GITHUB_ENV}
         echo "LATESTTAG=latest" >> ${GITHUB_ENV}
-        echo "TESTTAG=test-${{ github.sha }}" >> ${GITHUB_ENV}
-
-    - name: set TAG & TESTTAG for all other branches
-      if: ${{ github.event.repository.default_branch != 'main' && github.event.repository.default_branch != 'master' }}
-      run: |
-        echo "TAG=dev-${{ github.sha }}" >> ${GITHUB_ENV}
-        echo "LATESTTAG=dev-latest" >> ${GITHUB_ENV}
-        echo "TESTTAG=test-${{ github.sha }}" >> ${GITHUB_ENV}
+        echo "SHA_TAG=${{ github.sha }}" >> ${GITHUB_ENV}
+        echo "${GITHUB_ENV} File:"
+        cat ${GITHUB_ENV}
+      shell: bash
 
     - name: Docker login
       uses: docker/login-action@v1
@@ -77,6 +94,9 @@ jobs:
     - name: Tag the build as latest
       run: docker tag ${HPE_BUILD_REPO}:${TAG} ghcr.io/${HPE_DEPLOY_REPO}:${LATESTTAG}
 
+    - name: Tag the build using git SHA
+      run: docker tag ${HPE_BUILD_REPO}:${TAG} ghcr.io/${HPE_DEPLOY_REPO}:${SHA_TAG}
+
     - name: Push the tagged build
       if: ${{ env.DO_PUSH == 'true' }}
       run: docker push ghcr.io/${HPE_DEPLOY_REPO}:${TAG}
@@ -84,3 +104,7 @@ jobs:
     - name: Push the build tagged as latest
       if: ${{ env.DO_PUSH == 'true' }}
       run: docker push ghcr.io/${HPE_DEPLOY_REPO}:${LATESTTAG}
+
+    - name: Push the build tagged with git SHA
+      if: ${{ env.DO_PUSH == 'true' }}
+      run: docker push ghcr.io/${HPE_DEPLOY_REPO}:${SHA_TAG}

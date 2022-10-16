@@ -19,10 +19,7 @@
 #   To use podman:
 #   $ DOCKER=podman make docker-build
 DOCKER ?= docker
-
-VERSION ?= $(shell sed 1q .version)
 IMAGE_TAG_BASE ?= ghcr.io/hewlettpackard/lustre-csi-driver
-IMG ?= $(IMAGE_TAG_BASE):$(VERSION)
 
 # Tell Kustomize to deploy the default config, or an overlay.
 # To use the 'kind' overlay:
@@ -46,14 +43,17 @@ build: fmt vet docker-build
 run: fmt vet
 	go run ./main.go
 
-docker-build: Dockerfile fmt vet
-	time ${DOCKER} build -t $(IMG) .
+docker-build: VERSION=$(shell cat .version)
+docker-build: .version Dockerfile fmt vet
+	time ${DOCKER} build -t $(IMAGE_TAG_BASE):$(VERSION) .
 
-edit-image: ## Replace plugin.yaml image with name "controller" -> $IMG variable
-	cd deploy/kubernetes/base && $(KUSTOMIZE) edit set image controller=$(IMG)
+edit-image: VERSION=$(shell cat .version)
+edit-image: .version ## Replace plugin.yaml image with name "controller" -> ghcr tagged container reference
+	cd deploy/kubernetes/base && $(KUSTOMIZE) edit set image controller=$(IMAGE_TAG_BASE):$(VERSION)
 
-kind-push: ## Push image to Kind environment
-	kind load docker-image $(IMG)
+kind-push: VERSION=$(shell cat .version)
+kind-push: .version ## Push image to Kind environment
+	kind load docker-image $(IMAGE_TAG_BASE):$(VERSION)
 
 deploy_overlay: kustomize edit-image ## Deploy controller to the K8s cluster specified in ~/.kube/config.
 	$(KUSTOMIZE) build deploy/kubernetes/$(OVERLAY) | kubectl apply -f -
@@ -79,6 +79,11 @@ installer-gen: kustomize edit-image
 installer: ## Generates full .yaml output from Kustomize for base and overlays
 	make installer-gen OVERLAY=base && make installer-gen OVERLAY=overlays/kind OVERLAY_LABEL=-kind
 
+.version: ## Uses the git-version-gen script to generate a tag version
+	./git-version-gen > .version
+
+clean:
+	rm .version
 
 
 ## Location to install dependencies to
@@ -97,4 +102,3 @@ KUSTOMIZE_INSTALL_SCRIPT ?= "https://raw.githubusercontent.com/kubernetes-sigs/k
 kustomize: $(KUSTOMIZE) ## Download kustomize locally if necessary.
 $(KUSTOMIZE): $(LOCALBIN)
 	test -s $(LOCALBIN)/kustomize || { curl -s $(KUSTOMIZE_INSTALL_SCRIPT) | bash -s -- $(subst v,,$(KUSTOMIZE_VERSION)) $(LOCALBIN); }
-
