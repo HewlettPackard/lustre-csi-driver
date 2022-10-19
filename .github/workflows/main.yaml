@@ -1,0 +1,68 @@
+name: Docker build and push
+
+on:
+  push:
+  pull_request:
+    branches: [ master ]
+  workflow_dispatch:
+
+env:
+  # TEST_TARGET: Name of the testing target in the Dockerfile
+  TEST_TARGET: testing
+
+  # DO_TEST - true to build and run unit tests, false to skip the tests
+  # The docker test current fails on this project
+  DO_TEST: false
+
+  # DO_PUSH - true to push to the HPE_DEPLOY_REPO, false to not push
+  DO_PUSH: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
+
+    - name: "Lowercase repository name for docker build"
+      id: lowercase-repository-name
+      run: echo "REPO_NAME=$(echo ${{ github.repository }} | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
+
+    - name: set tags for main/master
+      run: |
+        echo "VERSION_TAG=$(./git-version-gen)" >> ${GITHUB_ENV}
+        echo "LATEST_TAG=latest" >> ${GITHUB_ENV}
+        echo "TEST_TAG=${{ github.sha }}-test" >> ${GITHUB_ENV}
+        echo "SHA_TAG=${{ github.sha }}" >> ${GITHUB_ENV}
+        echo "${GITHUB_ENV}:"
+        cat ${GITHUB_ENV}
+      shell: bash
+
+    - name: "Docker login"
+      uses: docker/login-action@v1
+      with:
+        registry: ghcr.io
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: "Build the test Docker image"
+      if: ${{ env.DO_TEST == 'true' }}
+      id: docker_build_test_target
+      uses: docker/build-push-action@v2
+      with:
+        push: false
+        target: ${{ env.TEST_TARGET }}
+        tags: ${{ env.REPO_NAME }}:${{ env.TEST_TAG }}
+
+    - name: Run the Docker image unit tests
+      if: ${{ env.DO_TEST == 'true' }}
+      run: docker run ${{ env.REPO_NAME }}:${{ env.TEST_TAG }}
+
+    - name: Build the final Docker image
+      id: docker_build
+      uses: docker/build-push-action@v2
+      with:
+        push: true
+        tags: ghcr.io/${{ env.REPO_NAME }}:${{ env.LATEST_TAG }} , ghcr.io/${{ env.REPO_NAME }}:${{ env.SHA_TAG }} , ghcr.io/${{ env.REPO_NAME }}:${{ env.VERSION_TAG }}

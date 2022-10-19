@@ -72,3 +72,12 @@ Inspect the `example_*.yaml` Kubernetes resources under [deploy/kubernetes/base]
 3. Deploy the PVC: `kubectl apply -f deploy/kubernetes/base/example_pvc.yaml`
 4. Deploy the app: `kubectl apply -f deploy/kubernetes/base/example_app.yaml`
    - Note: The lustre filesystem defaults to being mounted at `/mnt/lus` within the container. Update this in example_app.yaml if you desire a different location.
+
+## Steps for Releasing a Version
+
+1. Checkout the project at the commit you wish to release
+2. Create a local annotated tag: `git tag -a <tag> -m <message>`
+4. Push this tag to remote: `git push origin <tag>`
+   - This will trigger a package build with the `<tag>` version
+5. Go to [GitHub releases](https://github.com/HewlettPackard/lustre-csi-driver/releases) and **Draft a New Release**
+6. Use the `tag` corresponding to the release and fill out Title/Features/Bugfixes/etc.

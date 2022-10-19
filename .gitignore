@@ -29,3 +29,6 @@ testbin/*
 
 # .vscode log files
 .vscode/*.log
+
+# Generated version file
+.version
