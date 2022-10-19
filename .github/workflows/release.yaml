@@ -10,7 +10,6 @@ on:
       - "v*"
 
 env:
-  REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}
 
 jobs:
@@ -30,16 +29,12 @@ jobs:
       - name: "Log in to Docker"
         uses: docker/login-action@v1
         with:
-          password: "${{ secrets.GITHUB_TOKEN }}"
+          password: ${{ secrets.GITHUB_TOKEN }}
           registry: ghcr.io
-          username: "${{ github.actor }}"
+          username: ${{ github.actor }}
       - id: docker_build
         name: "Build the release Docker image"
         uses: docker/build-push-action@v2
         with:
-          push: false
-          tags: "${{ github.repository }}:${{ github.ref }}"
-      - name: "Tag the build for GHCR"
-        run: docker tag docker.io/${{ github.repository }}:${{ github.ref }} ghcr.io/${{ github.repository }}:${{ github.ref }}
-      - name: "Push the tagged build to GHCR"
-        run: docker push ghcr.io/${{ github.repository }}:${{ github.ref }}
+          push: true
+          tags: ghcr.io/${IMAGE_NAME}:${{ github.ref }}
