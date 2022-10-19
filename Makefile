@@ -43,15 +43,15 @@ build: fmt vet docker-build
 run: fmt vet
 	go run ./main.go
 
-docker-build: VERSION=$(shell cat .version)
+docker-build: VERSION ?= $(shell cat .version)
 docker-build: .version Dockerfile fmt vet
 	time ${DOCKER} build -t $(IMAGE_TAG_BASE):$(VERSION) .
 
-edit-image: VERSION=$(shell cat .version)
+edit-image: VERSION ?= $(shell cat .version)
 edit-image: .version ## Replace plugin.yaml image with name "controller" -> ghcr tagged container reference
 	cd deploy/kubernetes/base && $(KUSTOMIZE) edit set image controller=$(IMAGE_TAG_BASE):$(VERSION)
 
-kind-push: VERSION=$(shell cat .version)
+kind-push: VERSION ?= $(shell cat .version)
 kind-push: .version ## Push image to Kind environment
 	kind load docker-image $(IMAGE_TAG_BASE):$(VERSION)
 
