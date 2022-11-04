@@ -42,7 +42,6 @@ spec:
             # This is necessary only for systems with SELinux, where the CSI driver needs
             # to mount the mount-dir with bidirectional mount propagation.
             privileged: true
-          imagePullPolicy: Always
           env:
             - name: CSI_ENDPOINT
               value: unix:///csi/csi.sock
