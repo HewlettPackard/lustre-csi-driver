@@ -47,6 +47,8 @@ spec:
               value: unix:///csi/csi.sock
             - name: X_CSI_DEBUG
               value: "true"
+            - name: X_CSI_SPEC_DISABLE_LEN_CHECK
+              value: "true"
             - name: KUBE_NODE_NAME
               valueFrom:
                 fieldRef:
