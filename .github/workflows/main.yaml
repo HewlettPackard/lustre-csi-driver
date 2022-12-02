@@ -41,8 +41,8 @@ jobs:
       run: |
         echo "VERSION_TAG=$(./git-version-gen)" >> ${GITHUB_ENV}
         echo "LATEST_TAG=latest" >> ${GITHUB_ENV}
-        echo "TEST_TAG=${{ github.sha }}-test" >> ${GITHUB_ENV}
-        echo "SHA_TAG=${{ github.sha }}" >> ${GITHUB_ENV}
+        echo "TEST_TAG=$(git rev-parse HEAD)-test" >> ${GITHUB_ENV}
+        echo "SHA_TAG=$(git rev-parse HEAD)" >> ${GITHUB_ENV}
         echo "${GITHUB_ENV}:"
         cat ${GITHUB_ENV}
       shell: bash
@@ -61,7 +61,7 @@ jobs:
           # for PR event or merge event, tag example: 0.0.1.12-5667
           type=raw,value=${{ env.VERSION_TAG }}
           # for PR event or merge, tag example: 566769e04d2436cf5f42ae4f46092c7dff6e668e
-          type=raw,value=${{ github.sha }}          
+          type=raw,value=${{ env.SHA_TAG }}          
           # for push to semver tag, tag example: 0.0.2
           type=semver,pattern={{version}}
 
