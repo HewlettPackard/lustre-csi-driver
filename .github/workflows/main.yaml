@@ -56,6 +56,7 @@ jobs:
         tags: |
           type=ref,event=branch
           type=ref,event=pr
+          type=raw,value=${{ env.VERSION_TAG }}
           type=semver,pattern={{version}}
           type=sha,format=long,prefix=
 
@@ -86,4 +87,4 @@ jobs:
       uses: docker/build-push-action@v3
       with:
         push: true
-        tags: ${{ steps.meta.outputs.tags }},ghcr.io/${{ env.REPO_NAME }}:${{ env.VERSION_TAG }}
+        tags: ${{ steps.meta.outputs.tags }}
