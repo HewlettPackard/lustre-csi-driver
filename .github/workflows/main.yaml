@@ -86,4 +86,4 @@ jobs:
       uses: docker/build-push-action@v3
       with:
         push: true
-        tags: {{ steps.meta.outputs.tags }} , ghcr.io/${{ env.REPO_NAME }}:${{ env.VERSION_TAG }}
+        tags: {{ steps.meta.outputs.tags }},ghcr.io/${{ env.REPO_NAME }}:${{ env.VERSION_TAG }}
