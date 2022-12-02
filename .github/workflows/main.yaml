@@ -81,10 +81,9 @@ jobs:
       if: ${{ env.DO_TEST == 'true' }}
       run: docker run ${{ env.REPO_NAME }}:${{ env.TEST_TAG }}
 
-    # ,ghcr.io/${{ env.REPO_NAME }}:${{ env.VERSION_TAG }}
     - name: Build the final Docker image
       id: docker_build
       uses: docker/build-push-action@v3
       with:
         push: true
-        tags: {{ steps.meta.outputs.tags }}
+        tags: ${{ steps.meta.outputs.tags }},ghcr.io/${{ env.REPO_NAME }}:${{ env.VERSION_TAG }}
