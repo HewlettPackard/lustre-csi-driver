@@ -2,9 +2,12 @@ name: Docker build and push
 
 on:
   push:
+    branches:
+      - 'master'
+    tags:
+      - 'v*'
   pull_request:
     branches: [ master ]
-  workflow_dispatch:
 
 env:
   # TEST_TARGET: Name of the testing target in the Dockerfile
@@ -22,15 +25,19 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v3
+    - name: "Checkout repository"
+      id: checkout_repo
+      uses: actions/checkout@v3
       with:
         fetch-depth: 0
+        ref: ${{ github.event.pull_request.head.sha }}
 
     - name: "Lowercase repository name for docker build"
       id: lowercase-repository-name
       run: echo "REPO_NAME=$(echo ${{ github.repository }} | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
 
     - name: set tags for main/master
+      id: set_tags
       run: |
         echo "VERSION_TAG=$(./git-version-gen)" >> ${GITHUB_ENV}
         echo "LATEST_TAG=latest" >> ${GITHUB_ENV}
@@ -40,7 +47,26 @@ jobs:
         cat ${GITHUB_ENV}
       shell: bash
 
+    - name: "Docker metadata"
+      id: meta
+      uses: docker/metadata-action@v4
+      with:
+        images: |
+          ghcr.io/${{ env.REPO_NAME }}
+        tags: |
+          # for merge to master branch, tag example: 'master'
+          type=ref,event=branch
+          # for PR event, tag example: 'pr-3'
+          type=ref,event=pr
+          # for PR event or merge event, tag example: 0.0.1.12-5667
+          type=raw,value=${{ env.VERSION_TAG }}
+          # for PR event or merge event, tag example: 566769e04d2436cf5f42ae4f46092c7dff6e668e
+          type=raw,value=${{ github.event.pull_request.head.sha }}
+          # for push to semver tag, tag example: 0.0.2
+          type=semver,pattern={{version}}
+
     - name: "Docker login"
+      id: docker_login
       uses: docker/login-action@v1
       with:
         registry: ghcr.io
@@ -48,8 +74,8 @@ jobs:
         password: ${{ secrets.GITHUB_TOKEN }}
 
     - name: "Build the test Docker image"
-      if: ${{ env.DO_TEST == 'true' }}
       id: docker_build_test_target
+      if: ${{ env.DO_TEST == 'true' }}
       uses: docker/build-push-action@v2
       with:
         push: false
@@ -57,12 +83,13 @@ jobs:
         tags: ${{ env.REPO_NAME }}:${{ env.TEST_TAG }}
 
     - name: Run the Docker image unit tests
+      id: docker_test
       if: ${{ env.DO_TEST == 'true' }}
       run: docker run ${{ env.REPO_NAME }}:${{ env.TEST_TAG }}
 
     - name: Build the final Docker image
       id: docker_build
-      uses: docker/build-push-action@v2
+      uses: docker/build-push-action@v3
       with:
         push: true
-        tags: ghcr.io/${{ env.REPO_NAME }}:${{ env.LATEST_TAG }} , ghcr.io/${{ env.REPO_NAME }}:${{ env.SHA_TAG }} , ghcr.io/${{ env.REPO_NAME }}:${{ env.VERSION_TAG }}
+        tags: ${{ steps.meta.outputs.tags }}

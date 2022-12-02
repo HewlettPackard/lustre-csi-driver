@@ -26,15 +26,3 @@ jobs:
         run: if test x$(git for-each-ref ${{ github.ref }} | awk '{print $2}') = xtag; then /bin/true; else echo "\"${{ github.ref }}\" does not look like an annotated tag!"; /bin/false; fi
       - name: "Echo release tag"
         run: echo "TAG=${{ github.repository }}:${{ github.ref }}"
-      - name: "Log in to Docker"
-        uses: docker/login-action@v1
-        with:
-          password: ${{ secrets.GITHUB_TOKEN }}
-          registry: ghcr.io
-          username: ${{ github.actor }}
-      - id: docker_build
-        name: "Build the release Docker image"
-        uses: docker/build-push-action@v2
-        with:
-          push: true
-          tags: ghcr.io/${IMAGE_NAME}:${{ github.ref }}
