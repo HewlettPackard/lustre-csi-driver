@@ -107,8 +107,10 @@ func (s *service) NodeUnpublishVolume(
 
 	mounter := mount.New("")
 	notMountPoint, err := mount.IsNotMountPoint(mounter, req.GetTargetPath())
-	if err != nil && !errors.Is(err, fs.ErrNotExist) {
-		return nil, status.Errorf(codes.Internal, "NodeUnpublishVolume - Mount point check Failed: Error %v", err)
+	if err != nil {
+		if !errors.Is(err, fs.ErrNotExist) {
+			return nil, status.Errorf(codes.Internal, "NodeUnpublishVolume - Mount point check Failed: Error %v", err)
+		}
 	} else if !notMountPoint {
 		err := mounter.Unmount(req.GetTargetPath())
 
