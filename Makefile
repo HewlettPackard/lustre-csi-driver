@@ -79,11 +79,14 @@ installer-gen: kustomize edit-image
 installer: ## Generates full .yaml output from Kustomize for base and overlays
 	make installer-gen OVERLAY=base && make installer-gen OVERLAY=overlays/kind OVERLAY_LABEL=-kind
 
+# Let .version be phony so that a git update to the workarea can be reflected
+# in it each time it's needed.
+.PHONY: .version
 .version: ## Uses the git-version-gen script to generate a tag version
-	./git-version-gen > .version
+	./git-version-gen --fallback `git rev-parse HEAD` > .version
 
 clean:
-	rm .version
+	rm -f .version
 
 
 ## Location to install dependencies to
