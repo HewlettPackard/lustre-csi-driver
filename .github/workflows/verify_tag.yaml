@@ -1,9 +1,7 @@
-# Release workflow: Pushing a tag triggers this workflow,
-# which uses the name of the tag as the container tag/version
-# that goes into GHCR.
-name: Release
+# Pushing a tag triggers this workflow, which verifies that it is an
+# annotated tag.
+name: Verify tag
 
-# Build and publish Docker image upon pushing a tag
 on:
   push:
     tags:
@@ -16,8 +14,8 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-        # actions/checkout@v2 breaks annotated tags by converting them into
+      - uses: actions/checkout@v3
+        # actions/checkout@v3 breaks annotated tags by converting them into
         # lightweight tags, so we need to force fetch the tag again
         # See: https://github.com/actions/checkout/issues/290
       - name: "Repair tag"
