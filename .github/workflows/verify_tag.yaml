@@ -7,13 +7,15 @@ on:
     tags:
       - "v*"
 
-env:
-  IMAGE_NAME: ${{ github.repository }}
-
 jobs:
-  build:
+  verify_tag:
     runs-on: ubuntu-latest
     steps:
+      - name: "Verify context"
+        run: |
+          echo "ref is ${{ github.ref }}"
+          echo "ref_type is ${{ github.ref_type }}"
+
       - uses: actions/checkout@v3
         # actions/checkout@v3 breaks annotated tags by converting them into
         # lightweight tags, so we need to force fetch the tag again

@@ -3,8 +3,7 @@ name: Docker build and push
 on:
   push:
     branches:
-      - 'master'
-      - 'releases/v*'
+      - '*'
     tags:
       - 'v*'
   pull_request:
@@ -28,6 +27,11 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+    - name: "Build context"
+      run: |
+        echo "ref is ${{ github.ref }}"
+        echo "ref_type is ${{ github.ref_type }}"
+
     - name: "Checkout repository"
       id: checkout_repo
       uses: actions/checkout@v3
