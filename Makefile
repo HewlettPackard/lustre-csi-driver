@@ -37,7 +37,9 @@ fmt: ## Run go fmt against code.
 vet: ## Run go vet against code.
 	go vet ./...
 
-build: fmt vet docker-build
+build: VERSION ?= $(shell cat .version)
+build: .version fmt vet
+	go mod vendor
 	go build -o bin/lustre-csi-driver
 
 run: fmt vet
