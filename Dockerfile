@@ -1,16 +1,17 @@
 # Builder stage for compiling go source code
-FROM golang:1.17 as builder
+FROM golang:1.19 as builder
 
 WORKDIR /workspace
 
 # Copy the Go Modules manifests
-COPY go.mod go.mod
-COPY go.sum go.sum
+COPY go.mod go.sum ./
 
 # Copy the go source
 COPY main.go main.go
 COPY pkg/ pkg/
-COPY vendor/ vendor/
+
+# Retrieve go dependencies
+RUN go mod download
 
 # Build
 RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -a -o lustre-csi-driver main.go
