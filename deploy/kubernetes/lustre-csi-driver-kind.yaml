@@ -45,7 +45,7 @@ spec:
             fieldRef:
               apiVersion: v1
               fieldPath: spec.nodeName
-        image: ghcr.io/hewlettpackard/lustre-csi-driver:latest
+        image: ghcr.io/hewlettpackard/lustre-csi-driver:0.0.3
         name: csi-node-driver
         securityContext:
           privileged: true
