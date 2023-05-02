@@ -36,7 +36,7 @@ spec:
               mountPath: /csi
       containers:
         - name: csi-node-driver
-          image: ghcr.io/hewlettpackard/lustre-csi-driver:latest
+          image: {{ .Values.deployment.image }}:{{ .Values.deployment.tag }}
           args:
            - --driver=lustre
           securityContext:
