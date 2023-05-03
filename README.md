@@ -81,4 +81,3 @@ Inspect the `example_*.yaml` Kubernetes resources under [deploy/kubernetes/base]
    - This will trigger a package build with the `<tag>` version
 5. Go to [GitHub releases](https://github.com/HewlettPackard/lustre-csi-driver/releases) and **Draft a New Release**
 6. Use the `tag` corresponding to the release and fill out Title/Features/Bugfixes/etc.
-
