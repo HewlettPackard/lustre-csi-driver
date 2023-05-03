@@ -48,7 +48,7 @@ To deploy a specific [overlay](./deploy/kubernetes/overlays):
 - `make deploy OVERLAY=overlays/<overlay>`
 
 Otherwise, you can just use the pre-built .yaml files in [deploy/kubernetes](./deploy/kubernetes):
-- `kubectl apply -f https://raw.githubusercontent.com/HewlettPackard/lustre-csi-driver/master/deploy/kubernetes/lustre-csi-driver.yaml`
+- `kubectl apply -k 'https://github.com/HewlettPackard/lustre-csi-driver.git/deploy/kubernetes/overlays/kind/?ref=master'`
 
 ### Kind
 
