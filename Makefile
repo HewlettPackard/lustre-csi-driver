@@ -75,11 +75,7 @@ undeploy: undeploy_overlay
 kind-undeploy: OVERLAY=overlays/kind
 kind-undeploy: undeploy_overlay
 
-installer-gen: kustomize edit-image helm-version
-	$(KUSTOMIZE) build deploy/kubernetes/$(OVERLAY) > deploy/kubernetes/lustre-csi-driver$(OVERLAY_LABEL).yaml
-
-installer: ## Generates full .yaml output from Kustomize for base and overlays
-	make installer-gen OVERLAY=base && make installer-gen OVERLAY=overlays/kind OVERLAY_LABEL=-kind
+installer: kustomize edit-image helm-version
 
 helm-version: VERSION ?= $(shell cat .version)
 helm-version: .version ## Updates the Helm values.yaml with new version
