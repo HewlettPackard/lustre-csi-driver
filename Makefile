@@ -75,15 +75,11 @@ undeploy: undeploy_overlay
 kind-undeploy: OVERLAY=overlays/kind
 kind-undeploy: undeploy_overlay
 
-installer-gen: kustomize edit-image helm-version
+installer-gen: kustomize edit-image
 	$(KUSTOMIZE) build deploy/kubernetes/$(OVERLAY) > deploy/kubernetes/lustre-csi-driver$(OVERLAY_LABEL).yaml
 
 installer: ## Generates full .yaml output from Kustomize for base and overlays
 	make installer-gen OVERLAY=base && make installer-gen OVERLAY=overlays/kind OVERLAY_LABEL=-kind
-
-helm-version: VERSION ?= $(shell cat .version)
-helm-version: .version yq
-	yq e -i ".deployment.tag=\"$(VERSION)\"" charts/lustre-csi-driver/values.yaml
 
 # Let .version be phony so that a git update to the workarea can be reflected
 # in it each time it's needed.
@@ -102,20 +98,12 @@ $(LOCALBIN):
 
 ## Tool Binaries
 KUSTOMIZE ?= $(LOCALBIN)/kustomize
-YQ ?= $(LOCALBIN)/yq
 
 ## Tool Versions
 KUSTOMIZE_VERSION ?= v4.5.7
-YQ_VERSION ?= v4.33.3
 
 KUSTOMIZE_INSTALL_SCRIPT ?= "https://raw.githubusercontent.com/kubernetes-sigs/kustomize/master/hack/install_kustomize.sh"
 .PHONY: kustomize
 kustomize: $(KUSTOMIZE) ## Download kustomize locally if necessary.
 $(KUSTOMIZE): $(LOCALBIN)
 	test -s $(LOCALBIN)/kustomize || { curl -s $(KUSTOMIZE_INSTALL_SCRIPT) | bash -s -- $(subst v,,$(KUSTOMIZE_VERSION)) $(LOCALBIN); }
-
-YQ_BINARY ?= "https://github.com/mikefarah/yq/releases/download/v4.33.3/yq_linux_amd64"
-.PHONY: yq
-yq: $(YQ)
-$(YQ): $(LOCALBIN)
-	test -s $(LOCALBIN)/yq || wget --quiet -O $(LOCALBIN)/yq $(YQ_BINARY)
