@@ -4,4 +4,4 @@
 
 deployment:
   image: "ghcr.io/hewlettpackard/lustre-csi-driver"
-  tag: "master"
+  tag: "0.0.3"
