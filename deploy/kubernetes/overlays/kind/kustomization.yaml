@@ -14,3 +14,6 @@ patches:
       version: v1
       kind: DaemonSet
       name: lustre-csi-node
+
+patchesStrategicMerge:
+  - manager_tolerations_patch.yaml
