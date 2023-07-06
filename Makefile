@@ -1,4 +1,4 @@
-# Copyright 2021, 2022 Hewlett Packard Enterprise Development LP
+# Copyright 2021-2023 Hewlett Packard Enterprise Development LP
 # Other additional copyright holders may be indicated within.
 #
 # The entirety of this work is licensed under the Apache License,
@@ -90,6 +90,9 @@ helm-version: .version ## Updates the Helm values.yaml with new version
 clean:
 	rm -f .version
 
+.PHONY: clean-bin
+clean-bin:
+	rm -rf $(LOCALBIN)
 
 ## Location to install dependencies to
 LOCALBIN ?= $(shell pwd)/bin
@@ -104,6 +107,8 @@ KUSTOMIZE_VERSION ?= v4.5.7
 
 KUSTOMIZE_INSTALL_SCRIPT ?= "https://raw.githubusercontent.com/kubernetes-sigs/kustomize/master/hack/install_kustomize.sh"
 .PHONY: kustomize
-kustomize: $(KUSTOMIZE) ## Download kustomize locally if necessary.
-$(KUSTOMIZE): $(LOCALBIN)
-	test -s $(LOCALBIN)/kustomize || { curl -s $(KUSTOMIZE_INSTALL_SCRIPT) | bash -s -- $(subst v,,$(KUSTOMIZE_VERSION)) $(LOCALBIN); }
+kustomize: $(LOCALBIN) ## Download kustomize locally if necessary.
+	if [[ ! -s $(LOCALBIN)/kustomize || $$($(LOCALBIN)/kustomize version | awk '{print $$1}' | awk -F/ '{print $$2}') != $(KUSTOMIZE_VERSION) ]]; then \
+	  rm -f $(LOCALBIN)/kustomize && \
+	  { curl -s $(KUSTOMIZE_INSTALL_SCRIPT) | bash -s -- $(subst v,,$(KUSTOMIZE_VERSION)) $(LOCALBIN); }; \
+	fi
