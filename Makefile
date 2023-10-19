@@ -51,14 +51,14 @@ docker-build: .version Dockerfile fmt vet
 
 edit-image: VERSION ?= $(shell cat .version)
 edit-image: .version ## Replace plugin.yaml image with name "controller" -> ghcr tagged container reference
-	cd deploy/kubernetes/base && $(KUSTOMIZE) edit set image controller=$(IMAGE_TAG_BASE):$(VERSION)
+	$(KUSTOMIZE_IMAGE_TAG) deploy/kubernetes/begin $(OVERLAY) $(IMAGE_TAG_BASE) $(VERSION)
 
 kind-push: VERSION ?= $(shell cat .version)
 kind-push: .version ## Push image to Kind environment
 	kind load docker-image $(IMAGE_TAG_BASE):$(VERSION)
 
 deploy_overlay: kustomize edit-image ## Deploy controller to the K8s cluster specified in ~/.kube/config.
-	$(KUSTOMIZE) build deploy/kubernetes/$(OVERLAY) | kubectl apply -f -
+	$(KUSTOMIZE) build deploy/kubernetes/begin | kubectl apply -f -
 
 deploy: OVERLAY ?= base
 deploy: deploy_overlay
@@ -100,6 +100,7 @@ $(LOCALBIN):
 	mkdir -p $(LOCALBIN)
 
 ## Tool Binaries
+KUSTOMIZE_IMAGE_TAG ?= ./hack/make-kustomization.sh
 KUSTOMIZE ?= $(LOCALBIN)/kustomize
 
 ## Tool Versions
