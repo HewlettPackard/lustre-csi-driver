@@ -1,4 +1,4 @@
-# Copyright 2021-2023 Hewlett Packard Enterprise Development LP
+# Copyright 2021-2024 Hewlett Packard Enterprise Development LP
 # Other additional copyright holders may be indicated within.
 #
 # The entirety of this work is licensed under the Apache License,
@@ -28,6 +28,7 @@ IMAGE_TAG_BASE ?= ghcr.io/hewlettpackard/lustre-csi-driver
 # Or, make kind-deploy
 # To deploy the base lustre config:
 #   make deploy
+OVERLAY ?= overlays/kind
 
 all: build
 
@@ -51,14 +52,14 @@ docker-build: .version Dockerfile fmt vet
 
 edit-image: VERSION ?= $(shell cat .version)
 edit-image: .version ## Replace plugin.yaml image with name "controller" -> ghcr tagged container reference
-	cd deploy/kubernetes/base && $(KUSTOMIZE) edit set image controller=$(IMAGE_TAG_BASE):$(VERSION)
+	$(KUSTOMIZE_IMAGE_TAG) deploy/kubernetes/begin $(OVERLAY) $(IMAGE_TAG_BASE) $(VERSION)
 
 kind-push: VERSION ?= $(shell cat .version)
 kind-push: .version ## Push image to Kind environment
 	kind load docker-image $(IMAGE_TAG_BASE):$(VERSION)
 
 deploy_overlay: kustomize edit-image ## Deploy controller to the K8s cluster specified in ~/.kube/config.
-	$(KUSTOMIZE) build deploy/kubernetes/$(OVERLAY) | kubectl apply -f -
+	$(KUSTOMIZE) build deploy/kubernetes/begin | kubectl apply -f -
 
 deploy: OVERLAY ?= base
 deploy: deploy_overlay
@@ -100,15 +101,16 @@ $(LOCALBIN):
 	mkdir -p $(LOCALBIN)
 
 ## Tool Binaries
+KUSTOMIZE_IMAGE_TAG ?= ./hack/make-kustomization.sh
 KUSTOMIZE ?= $(LOCALBIN)/kustomize
 
 ## Tool Versions
-KUSTOMIZE_VERSION ?= v4.5.7
+KUSTOMIZE_VERSION ?= v5.1.1
 
 KUSTOMIZE_INSTALL_SCRIPT ?= "https://raw.githubusercontent.com/kubernetes-sigs/kustomize/master/hack/install_kustomize.sh"
 .PHONY: kustomize
 kustomize: $(LOCALBIN) ## Download kustomize locally if necessary.
-	if [[ ! -s $(LOCALBIN)/kustomize || $$($(LOCALBIN)/kustomize version | awk '{print $$1}' | awk -F/ '{print $$2}') != $(KUSTOMIZE_VERSION) ]]; then \
+	if [[ ! -s $(LOCALBIN)/kustomize || ! $$($(LOCALBIN)/kustomize version) =~ $(KUSTOMIZE_VERSION) ]]; then \
 	  rm -f $(LOCALBIN)/kustomize && \
 	  { curl -s $(KUSTOMIZE_INSTALL_SCRIPT) | bash -s -- $(subst v,,$(KUSTOMIZE_VERSION)) $(LOCALBIN); }; \
 	fi
