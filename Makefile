@@ -59,8 +59,9 @@ kind-push: .version ## Push image to Kind environment
 	kind load docker-image $(IMAGE_TAG_BASE):$(VERSION)
 
 deploy_overlay: kustomize edit-image ## Deploy controller to the K8s cluster specified in ~/.kube/config.
-	$(KUSTOMIZE) build deploy/kubernetes/begin | kubectl apply -f -
+	./deploy.sh deploy $(KUSTOMIZE) deploy/kubernetes/begin
 
+.PHONY: deploy
 deploy: OVERLAY ?= base
 deploy: deploy_overlay
 
@@ -68,7 +69,7 @@ kind-deploy: OVERLAY=overlays/kind
 kind-deploy: deploy_overlay
 
 undeploy_overlay: kustomize ## Undeploy controller from the K8s cluster specified in ~/.kube/config.
-	$(KUSTOMIZE) build deploy/kubernetes/$(OVERLAY) | kubectl delete -f -
+	./deploy.sh undeploy $(KUSTOMIZE) deploy/kubernetes/$(OVERLAY)
 
 undeploy: OVERLAY ?= lustre
 undeploy: undeploy_overlay
