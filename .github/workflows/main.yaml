@@ -1,15 +1,6 @@
 name: Docker build and push
 
-on:
-  push:
-    branches:
-      - '*'
-    tags:
-      - 'v*'
-  pull_request:
-    branches:
-      - 'master'
-      - 'releases/v*'
+on: [push]
 
 env:
   # TEST_TARGET: Name of the testing target in the Dockerfile
@@ -18,9 +9,6 @@ env:
   # DO_TEST - true to build and run unit tests, false to skip the tests
   # The docker test current fails on this project
   DO_TEST: false
-
-  # DO_PUSH - true to push to the HPE_DEPLOY_REPO, false to not push
-  DO_PUSH: true
 
 jobs:
   build:
@@ -102,4 +90,24 @@ jobs:
       with:
         push: true
         tags: ${{ steps.meta.outputs.tags }}
+
+  create_release:
+    needs: build
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+      with:
+        fetch-tags: true
+        fetch-depth: 0
+    - name: Repair tag
+      run: git fetch -f origin ${{ github.ref }}:${{ github.ref }}
+    - name: Verify that the tag is annotated
+      run: if test x$(git for-each-ref ${{ github.ref }} | awk '{print $2}') = xtag; then /bin/true; else echo "\"${{ github.ref }}\" does not look like an annotated tag!"; /bin/false; fi
+    - name: Release
+      uses: softprops/action-gh-release@v1
+      with:
+        #prerelease: true
+        generate_release_notes: true
 
