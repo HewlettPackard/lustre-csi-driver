@@ -18,6 +18,7 @@
 # limitations under the License.
 
 set -e
+set -o pipefail
 
 # Deploy/undeploy controller to the K8s cluster specified in ~/.kube/config.
 
@@ -26,12 +27,12 @@ KUSTOMIZE=$2
 OVERLAY_DIR=$3
 
 if [[ $CMD == 'deploy' ]]; then
-    $KUSTOMIZE build $OVERLAY_DIR | kubectl apply -f -
+    $KUSTOMIZE build "$OVERLAY_DIR" | kubectl apply -f -
 fi
 
 if [[ $CMD == 'undeploy' ]]; then
     # Do not touch the namespace resource when deleting this service.
-    $KUSTOMIZE build $OVERLAY_DIR | yq eval 'select(.kind != "Namespace")' |  kubectl delete --ignore-not-found -f -
+    $KUSTOMIZE build "$OVERLAY_DIR" | yq eval 'select(.kind != "Namespace")' |  kubectl delete --ignore-not-found -f -
 fi
 
 exit 0
