@@ -32,7 +32,8 @@ fi
 
 if [[ $CMD == 'undeploy' ]]; then
     # Do not touch the namespace resource when deleting this service.
-    $KUSTOMIZE build "$OVERLAY_DIR" | yq eval 'select(.kind != "Namespace")' |  kubectl delete --ignore-not-found -f -
+    # Wishing for yq(1)...
+    $KUSTOMIZE build "$OVERLAY_DIR" | python3 -c 'import yaml, sys; all_docs = yaml.safe_load_all(sys.stdin); less_docs=[doc for doc in all_docs if doc["kind"] != "Namespace"]; print(yaml.dump_all(less_docs))' |  kubectl delete --ignore-not-found -f -
 fi
 
 exit 0
