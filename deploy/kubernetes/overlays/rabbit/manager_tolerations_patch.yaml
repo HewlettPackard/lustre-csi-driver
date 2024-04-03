@@ -12,3 +12,5 @@ spec:
           operator: "Equal"
           value: "true"
           effect: "NoSchedule"
+        - key: "cray.nnf.node.drain"
+          operator: "Exists"

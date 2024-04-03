@@ -22,10 +22,10 @@ frameworks to mount and unmount Lustre filesystems to/from containers in their p
 
 ## Kubernetes Compatibility Matrix
 
-| Lustre CSI Driver / Kubernetes Version | v1.12 | v1.13 | v1.14 | v1.15 | v1.16 | v1.17 | v1.18+ |
-|----------------------------------------|-------|-------|-------|-------|-------|-------|--------|
-| v0.0.1                                 | no    | yes   | yes   | yes   | yes   | yes   | yes    |
-
+| Lustre CSI Driver / Kubernetes Version | v1.13-1.18 | v1.25 | v1.27 |
+|----------------------------------------|------------|-------|-------|
+| v0.0.1                                 | yes        | yes   | yes   |
+| v0.0.10                                | yes        | yes   | yes   |
 
 ## Deployment
 
