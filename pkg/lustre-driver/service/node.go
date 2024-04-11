@@ -73,18 +73,34 @@ func (s *service) NodePublishVolume(
 		return nil, status.Errorf(codes.Internal, "NodePublishVolume - Mountpoint mkdir Failed: Error %v", err)
 	}
 
-	// 2. Perform the mount
+	// 2. Verify that it's not yet mounted.
 	mounter := mount.New("")
-	err = mounter.Mount(
-		req.GetVolumeId(),
-		req.GetTargetPath(),
-		req.GetVolumeCapability().GetMount().GetFsType(),
-		req.GetVolumeCapability().GetMount().GetMountFlags())
-
+	isMounted := false
+	mountpoints, err := mounter.List()
 	if err != nil {
-		return nil, status.Errorf(codes.Internal, "NodePublishVolume - Mount Failed: Error %v", err)
-	} else {
-		log.WithField("source", req.GetVolumeId()).WithField("target", req.GetTargetPath()).Info("Mounted")
+		return nil, status.Errorf(codes.Internal, "NodePublishVolume - List mounts failed: Error %v", err)
+	}
+	for idx := range mountpoints {
+		if mountpoints[idx].Path == req.GetTargetPath() && mountpoints[idx].Device == req.GetVolumeId() {
+			log.WithField("source", req.GetVolumeId()).WithField("target", req.GetTargetPath()).Info("Already mounted")
+			isMounted = true
+			break
+		}
+	}
+
+	// 3. Perform the mount.
+	if !isMounted {
+		err := mounter.Mount(
+			req.GetVolumeId(),
+			req.GetTargetPath(),
+			req.GetVolumeCapability().GetMount().GetFsType(),
+			req.GetVolumeCapability().GetMount().GetMountFlags())
+
+		if err != nil {
+			return nil, status.Errorf(codes.Internal, "NodePublishVolume - Mount Failed: Error %v", err)
+		} else {
+			log.WithField("source", req.GetVolumeId()).WithField("target", req.GetTargetPath()).Info("Mounted")
+		}
 	}
 
 	return &csi.NodePublishVolumeResponse{}, nil
