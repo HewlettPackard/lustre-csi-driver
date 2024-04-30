@@ -21,6 +21,7 @@ package service
 
 import (
 	"os"
+	"strings"
 
 	log "github.com/sirupsen/logrus"
 	"golang.org/x/net/context"
@@ -121,7 +122,9 @@ func (s *service) NodeUnpublishVolume(
 
 	mounter := mount.New("")
 	notMountPoint, err := mount.IsNotMountPoint(mounter, req.GetTargetPath())
-	if err != nil {
+	if err != nil && strings.Contains(err.Error(), "no such") {
+		// consider it unmounted
+	} else if err != nil {
 		return nil, status.Errorf(codes.Internal, "NodeUnpublishVolume - Mount point check Failed: Error %v", err)
 	} else if !notMountPoint {
 		err := mounter.Unmount(req.GetTargetPath())
