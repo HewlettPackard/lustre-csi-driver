@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Copyright 2023 Hewlett Packard Enterprise Development LP
+# Copyright 2023-2024 Hewlett Packard Enterprise Development LP
 # Other additional copyright holders may be indicated within.
 #
 # The entirety of this work is licensed under the Apache License,
@@ -32,6 +32,21 @@ fi
 cat <<EOF > "$OVERLAY_DIR"/kustomization.yaml
 resources:
 - ../$OVERLAY
+
+commonLabels:
+  app.kubernetes.io/version: "$TAG"
+  app.kubernetes.io/component: lustre-csi-driver
+EOF
+
+if [[ -n $NNF_VERSION ]]
+then
+    cat <<EOF >> "$OVERLAY_DIR"/kustomization.yaml
+  app.kubernetes.io/nnf-version: "$NNF_VERSION"
+  app.kubernetes.io/part-of: nnf
+EOF
+fi
+
+cat <<EOF >> "$OVERLAY_DIR"/kustomization.yaml
 
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
