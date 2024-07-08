@@ -29,24 +29,43 @@ then
     mkdir "$OVERLAY_DIR"
 fi
 
+COMPONENT_LABELS="
+    - op: add
+      path: /metadata/labels/app.kubernetes.io~1version
+      value: "$TAG"
+    - op: add
+      path: /metadata/labels/app.kubernetes.io~1component
+      value: lustre-csi-driver
+"
+
+NNF_VER_LABELS=""
+if [[ -n $NNF_VERSION ]]
+then
+    NNF_VER_LABELS="
+    - op: add
+      path: /metadata/labels/app.kubernetes.io~1nnf-version
+      value: "$NNF_VERSION"
+    - op: add
+      path: /metadata/labels/app.kubernetes.io~1part-of
+      value: nnf
+"
+fi
+
 cat <<EOF > "$OVERLAY_DIR"/kustomization.yaml
 resources:
 - ../$OVERLAY
 
-commonLabels:
-  app.kubernetes.io/version: "$TAG"
-  app.kubernetes.io/component: lustre-csi-driver
-EOF
-
-if [[ -n $NNF_VERSION ]]
-then
-    cat <<EOF >> "$OVERLAY_DIR"/kustomization.yaml
-  app.kubernetes.io/nnf-version: "$NNF_VERSION"
-  app.kubernetes.io/part-of: nnf
-EOF
-fi
-
-cat <<EOF >> "$OVERLAY_DIR"/kustomization.yaml
+patches:
+- target:
+    kind: Deployment
+  patch: |-
+$COMPONENT_LABELS
+$NNF_VER_LABELS
+- target:
+    kind: DaemonSet
+  patch: |-
+$COMPONENT_LABELS
+$NNF_VER_LABELS
 
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
