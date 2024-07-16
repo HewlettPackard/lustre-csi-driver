@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Copyright 2023 Hewlett Packard Enterprise Development LP
+# Copyright 2023-2024 Hewlett Packard Enterprise Development LP
 # Other additional copyright holders may be indicated within.
 #
 # The entirety of this work is licensed under the Apache License,
@@ -29,9 +29,43 @@ then
     mkdir "$OVERLAY_DIR"
 fi
 
+COMPONENT_LABELS="
+    - op: add
+      path: /metadata/labels/app.kubernetes.io~1version
+      value: "$TAG"
+    - op: add
+      path: /metadata/labels/app.kubernetes.io~1component
+      value: lustre-csi-driver
+"
+
+NNF_VER_LABELS=""
+if [[ -n $NNF_VERSION ]]
+then
+    NNF_VER_LABELS="
+    - op: add
+      path: /metadata/labels/app.kubernetes.io~1nnf-version
+      value: "$NNF_VERSION"
+    - op: add
+      path: /metadata/labels/app.kubernetes.io~1part-of
+      value: nnf
+"
+fi
+
 cat <<EOF > "$OVERLAY_DIR"/kustomization.yaml
 resources:
 - ../$OVERLAY
+
+patches:
+- target:
+    kind: Deployment
+  patch: |-
+$COMPONENT_LABELS
+$NNF_VER_LABELS
+- target:
+    kind: DaemonSet
+  patch: |-
+$COMPONENT_LABELS
+$NNF_VER_LABELS
 
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
