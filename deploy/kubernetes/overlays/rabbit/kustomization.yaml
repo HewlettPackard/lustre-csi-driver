@@ -2,5 +2,5 @@
 resources:
   - ../../base
 
-patchesStrategicMerge:
-  - manager_tolerations_patch.yaml
+patches:
+  - path: manager_tolerations_patch.yaml
