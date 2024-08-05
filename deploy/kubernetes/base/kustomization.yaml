@@ -7,8 +7,8 @@ resources:
 - driver.yaml
 - plugin.yaml
 
-#patchesStrategicMerge:
-#- plugin_imagepullsecret_patch.yaml
+#patches:
+#- path: plugin_imagepullsecret_patch.yaml
 
 images:
 - name: controller
