@@ -7,10 +7,10 @@ resources:
 - driver.yaml
 - plugin.yaml
 
-#patchesStrategicMerge:
-#- plugin_imagepullsecret_patch.yaml
+#patches:
+#- path: plugin_imagepullsecret_patch.yaml
 
 images:
 - name: controller
   newName: ghcr.io/hewlettpackard/lustre-csi-driver
-  newTag: 0.1.2
+  newTag: 0.1.3
