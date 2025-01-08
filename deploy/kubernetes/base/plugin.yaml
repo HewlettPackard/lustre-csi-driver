@@ -73,6 +73,12 @@ spec:
             - name: mnt-dir
               mountPath: /mnt
               mountPropagation: Bidirectional
+            - name: localtime
+              mountPath: /etc/localtime
+              readOnly: true
+            - name: tzdata
+              mountPath: /usr/share/zoneinfo
+              readOnly: true
 
         # The node-driver-registrar is a sidecar container that registers the CSI driver with Kubelet
         # using the kubelet plugin registration mechanism. This is necessary because Kubelet is
@@ -102,6 +108,12 @@ spec:
               mountPath: /csi
             - name: registration-dir
               mountPath: /registration
+            - name: localtime
+              mountPath: /etc/localtime
+              readOnly: true
+            - name: tzdata
+              mountPath: /usr/share/zoneinfo
+              readOnly: true
 
       volumes:
         # This volume is where the socket for the kubelet->driver communication is done.
@@ -131,3 +143,9 @@ spec:
           hostPath:
             path: /mnt
             type: Directory
+        - name: localtime
+          hostPath:
+            path: /etc/localtime
+        - name: tzdata
+          hostPath:
+            path: /usr/share/zoneinfo
