@@ -41,6 +41,9 @@ ENTRYPOINT ["/bin/sh"]
 # is what we've built the Cray /sbin/mount.lustre user-space tool for.
 FROM registry.suse.com/bci/bci-base:latest
 
+# Remove timezone configuration so we can inherit from host
+RUN rm -rf /etc/timezone && rm -rf /etc/localtime
+
 WORKDIR /
 # Retrieve executable from previous layer
 COPY --from=builder /workspace/lustre-csi-driver .
