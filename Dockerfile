@@ -27,9 +27,7 @@ COPY go.mod go.sum ./
 # Copy the go source
 COPY main.go main.go
 COPY pkg/ pkg/
-
-# Retrieve go dependencies
-RUN go mod download
+COPY vendor/ vendor/
 
 # Build
 RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -a -o lustre-csi-driver main.go

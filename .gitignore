@@ -33,9 +33,6 @@ testbin/*
 # Generated version file
 .version
 
-# Go-generated vendor/ directory
-vendor/
-
 # Generated overlay for setting image tag
 deploy/kubernetes/begin/*
 
