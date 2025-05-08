@@ -14,3 +14,6 @@ by the host OS and the container).
 Cray internally builds and packages lustre-client RPMs with supporting functionality for a diverse range of networking
 interfaces, including Ethernet (`@tcp` NID), Infiniband (`@o2ib` NID), and Slingshot (`@kfi` NID). This `mount.lustre`
 is built to support parsing of a wider range of NID formats than what the publicly available lustre-client RPMs provide.
+
+The source tree for lustre-client is found at https://github.com/cray/lustre/tree/cray-2.15.B21.
+
