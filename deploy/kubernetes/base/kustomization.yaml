@@ -13,4 +13,4 @@ resources:
 images:
 - name: controller
   newName: ghcr.io/hewlettpackard/lustre-csi-driver
-  newTag: 0.1.7
+  newTag: 0.1.8
