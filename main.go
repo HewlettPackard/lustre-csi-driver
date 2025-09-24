@@ -23,6 +23,8 @@ import (
 	"context"
 	"flag"
 
+	log "github.com/sirupsen/logrus"
+
 	"github.com/rexray/gocsi"
 
 	"github.com/HewlettPackard/lustre-csi-driver/pkg/driver"
@@ -34,6 +36,9 @@ import (
 func main() {
 	var d = flag.String("driver", "lustre", "the Lustre CSI driver to execute: [\"lustre\", \"mock\"]")
 	flag.Parse()
+
+	log.SetLevel(log.InfoLevel)
+	log.SetFormatter(&log.TextFormatter{DisableColors: true, FullTimestamp: true, ForceQuote: true, QuoteEmptyFields: true})
 
 	drvr := newDriver(*d)
 
