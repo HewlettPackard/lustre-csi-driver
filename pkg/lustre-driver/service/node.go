@@ -72,9 +72,11 @@ func (s *service) NodePublishVolume(
 	// it into the pod's namespace.
 	log.WithField("targetPath", req.GetTargetPath()).Info("XX NodePublishVolume")
 
-	if req.GetVolumeId() != "stayhere" {
+	if req.GetVolumeId() != "10.1.1.113@tcp:/lushtx" {
 		return nil, status.Errorf(codes.InvalidArgument, fmt.Sprintf("NodePublishVolume - DEANDEAN stay here: volid %s, target: %s", req.GetVolumeId(), req.GetTargetPath()))
 	}
+
+	volId := "10.1.1.113@tcp:/lushtx"
 
 	err := os.MkdirAll(req.GetTargetPath(), 0755)
 	if err != nil && err != os.ErrExist {
@@ -89,8 +91,14 @@ func (s *service) NodePublishVolume(
 		return nil, status.Errorf(codes.Internal, "NodePublishVolume - List mounts failed: Error %v", err)
 	}
 	for idx := range mountpoints {
+		log.WithField("source", req.GetVolumeId()).WithField("target", req.GetTargetPath()).Info("Checking mounted")
 		if mountpoints[idx].Path == req.GetTargetPath() && mountpoints[idx].Device == req.GetVolumeId() {
 			log.WithField("source", req.GetVolumeId()).WithField("target", req.GetTargetPath()).Info("Already mounted")
+			isMounted = true
+			break
+		}
+		if mountpoints[idx].Device == "/dev/vdb" {
+			log.WithField("source", req.GetVolumeId()).WithField("target", req.GetTargetPath()).Info("Already mounted VDB")
 			isMounted = true
 			break
 		}
@@ -99,7 +107,7 @@ func (s *service) NodePublishVolume(
 	// 3. Perform the mount.
 	if !isMounted {
 		err := mounter.Mount(
-			req.GetVolumeId(),
+			"/dev/vdb",
 			req.GetTargetPath(),
 			req.GetVolumeCapability().GetMount().GetFsType(),
 			req.GetVolumeCapability().GetMount().GetMountFlags())
@@ -107,7 +115,7 @@ func (s *service) NodePublishVolume(
 		if err != nil {
 			return nil, status.Errorf(codes.Internal, "NodePublishVolume - Mount Failed: Error %v", err)
 		} else {
-			log.WithField("source", req.GetVolumeId()).WithField("target", req.GetTargetPath()).Info("Mounted")
+			log.WithField("source", volId).WithField("target", req.GetTargetPath()).Info("Mounted")
 		}
 	}
 
