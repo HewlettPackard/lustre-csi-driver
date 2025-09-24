@@ -20,6 +20,7 @@
 package service
 
 import (
+	"fmt"
 	"os"
 	"strings"
 
@@ -69,7 +70,12 @@ func (s *service) NodePublishVolume(
 	// As k8s starts a pod that references this FS, that pod will have
 	// a spec.containers[].volumeMounts that tells k8s where to bind mount
 	// it into the pod's namespace.
-	log.WithField("targetPath", req.GetTargetPath()).Info("NodePublishVolume")
+	log.WithField("targetPath", req.GetTargetPath()).Info("XX NodePublishVolume")
+
+	if req.GetVolumeId() != "stayhere" {
+		return nil, status.Errorf(codes.InvalidArgument, fmt.Sprintf("NodePublishVolume - DEANDEAN stay here: volid %s, target: %s", req.GetVolumeId(), req.GetTargetPath()))
+	}
+
 	err := os.MkdirAll(req.GetTargetPath(), 0755)
 	if err != nil && err != os.ErrExist {
 		return nil, status.Errorf(codes.Internal, "NodePublishVolume - Mountpoint mkdir Failed: Error %v", err)
@@ -122,7 +128,7 @@ func (s *service) NodeUnpublishVolume(
 	}
 
 	mounter := mount.New("")
-	log.WithField("targetPath", req.GetTargetPath()).Info("NodeUnpublishVolume")
+	log.WithField("targetPath", req.GetTargetPath()).Info("XX NodeUnpublishVolume")
 	notMountPoint, err := mount.IsNotMountPoint(mounter, req.GetTargetPath())
 	if err != nil && strings.Contains(err.Error(), "no such") {
 		// consider it unmounted
