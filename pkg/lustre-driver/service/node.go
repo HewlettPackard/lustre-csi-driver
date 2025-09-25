@@ -91,14 +91,14 @@ func (s *service) NodePublishVolume(
 		return nil, status.Errorf(codes.Internal, "NodePublishVolume - List mounts failed: Error %v", err)
 	}
 	for idx := range mountpoints {
-		log.WithField("source", req.GetVolumeId()).WithField("target", req.GetTargetPath()).Info("Checking mounted")
+		log.WithField("source", req.GetVolumeId()).WithField("target", req.GetTargetPath()).Info("XXX Checking mounted")
 		if mountpoints[idx].Path == req.GetTargetPath() && mountpoints[idx].Device == req.GetVolumeId() {
 			log.WithField("source", req.GetVolumeId()).WithField("target", req.GetTargetPath()).Info("Already mounted")
 			isMounted = true
 			break
 		}
 		if mountpoints[idx].Device == "/dev/vdb" {
-			log.WithField("source", req.GetVolumeId()).WithField("target", req.GetTargetPath()).Info("Already mounted VDB")
+			log.WithField("source", req.GetVolumeId()).WithField("target", req.GetTargetPath()).Info("XXX Already mounted VDB")
 			isMounted = true
 			break
 		}
@@ -115,7 +115,7 @@ func (s *service) NodePublishVolume(
 		if err != nil {
 			return nil, status.Errorf(codes.Internal, "NodePublishVolume - Mount Failed: Error %v", err)
 		} else {
-			log.WithField("source", volId).WithField("target", req.GetTargetPath()).Info("Mounted")
+			log.WithField("source", volId).WithField("target", req.GetTargetPath()).Info("XXX Mounted")
 		}
 	}
 
