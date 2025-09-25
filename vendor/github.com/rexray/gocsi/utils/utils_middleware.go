@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"reflect"
 
+	"github.com/sirupsen/logrus"
+
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
 )
@@ -99,6 +101,8 @@ func ChainUnaryServer(
 				curCtx context.Context,
 				curReq interface{}) (interface{}, error) {
 				info.FullMethod = fmt.Sprintf("%s-DEANDEAN-B", info.FullMethod)
+				logrus.Info("DEANDEAN - Inside ChainUnaryServer, heading for intercept switch") // DEANDEAN
+
 				return cur(curCtx, curReq, info, nxt)
 			}
 		}

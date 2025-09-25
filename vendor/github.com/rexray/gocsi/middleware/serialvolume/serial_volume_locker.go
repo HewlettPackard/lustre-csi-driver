@@ -5,6 +5,8 @@ import (
 	"io"
 	"time"
 
+	"github.com/sirupsen/logrus"
+
 	"github.com/akutz/gosync"
 	"github.com/container-storage-interface/spec/lib/go/csi"
 	xctx "golang.org/x/net/context"
@@ -44,12 +46,12 @@ func WithLockProvider(p mwtypes.VolumeLockerProvider) Option {
 // that provides serial access to volume resources across the following
 // RPCs:
 //
-//  * CreateVolume
-//  * DeleteVolume
-//  * ControllerPublishVolume
-//  * ControllerUnpublishVolume
-//  * NodePublishVolume
-//  * NodeUnpublishVolume
+//   - CreateVolume
+//   - DeleteVolume
+//   - ControllerPublishVolume
+//   - ControllerUnpublishVolume
+//   - NodePublishVolume
+//   - NodeUnpublishVolume
 func New(opts ...Option) grpc.UnaryServerInterceptor {
 
 	i := &interceptor{}
@@ -80,6 +82,8 @@ func (i *interceptor) handle(
 	req interface{},
 	info *grpc.UnaryServerInfo,
 	handler grpc.UnaryHandler) (interface{}, error) {
+
+	logrus.Info("DEANDEAN - Inside handler intercept switch") // DEANDEAN
 
 	switch treq := req.(type) {
 	case *csi.ControllerPublishVolumeRequest:
@@ -189,6 +193,8 @@ func (i *interceptor) nodePublishVolume(
 	info *grpc.UnaryServerInfo,
 	handler grpc.UnaryHandler) (res interface{}, resErr error) {
 
+	logrus.Info("DEANDEAN - Inside nodePublishVolume intercept") // DEANDEAN
+
 	lock, err := i.opts.locker.GetLockWithID(ctx, req.VolumeId)
 	if err != nil {
 		return nil, err
@@ -200,6 +206,8 @@ func (i *interceptor) nodePublishVolume(
 		return nil, status.Error(codes.Aborted, pending)
 	}
 	defer lock.Unlock()
+
+	logrus.Info("DEANDEAN - nodePublishVolume intercept calling handler") // DEANDEAN
 
 	return handler(ctx, req)
 }
