@@ -6144,6 +6144,7 @@ func _Node_NodePublishVolume_Handler(srv interface{}, ctx context.Context, dec f
 		FullMethod: "/csi.v1.Node/NodePublishVolumeDEANDEAN",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		panic("DEANDEAN NPV Handler")
 		return srv.(NodeServer).NodePublishVolume(ctx, req.(*NodePublishVolumeRequest))
 	}
 	return interceptor(ctx, in, info, handler)
