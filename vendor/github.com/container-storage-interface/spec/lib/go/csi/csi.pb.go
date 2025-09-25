@@ -8,6 +8,8 @@ import (
 	fmt "fmt"
 	math "math"
 
+	"github.com/sirupsen/logrus"
+
 	proto "github.com/golang/protobuf/proto"
 	descriptor "github.com/golang/protobuf/protoc-gen-go/descriptor"
 	timestamp "github.com/golang/protobuf/ptypes/timestamp"
@@ -6144,6 +6146,7 @@ func _Node_NodePublishVolume_Handler(srv interface{}, ctx context.Context, dec f
 		FullMethod: "/csi.v1.Node/NodePublishVolumeDEANDEAN",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		logrus.Info("DEANDEAN - Inside NodePublishVolume handler")  // DEANDEAN
 		info.FullMethod = fmt.Sprintf("%s-INSIDE", info.FullMethod) // DEANDEAN
 		return srv.(NodeServer).NodePublishVolume(ctx, req.(*NodePublishVolumeRequest))
 	}
