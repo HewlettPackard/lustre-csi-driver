@@ -91,9 +91,8 @@ func (s *service) NodePublishVolume(
 		return nil, status.Errorf(codes.Internal, "NodePublishVolume - List mounts failed: Error %v", err)
 	}
 	for idx := range mountpoints {
-		log.WithField("source", req.GetVolumeId()).WithField("target", req.GetTargetPath()).Info("XXX Checking mounted")
 		if mountpoints[idx].Path == req.GetTargetPath() && mountpoints[idx].Device == req.GetVolumeId() {
-			log.WithField("source", req.GetVolumeId()).WithField("target", req.GetTargetPath()).Info("Already mounted")
+			log.WithField("source", req.GetVolumeId()).WithField("target", req.GetTargetPath()).Info("XXX Already mounted")
 			isMounted = true
 			break
 		}

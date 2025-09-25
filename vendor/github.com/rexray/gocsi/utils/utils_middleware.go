@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"fmt"
 	"reflect"
 
 	"golang.org/x/net/context"
@@ -76,8 +77,9 @@ func ChainUnaryServer(
 		return func(
 			ctx context.Context,
 			req interface{},
-			_ *grpc.UnaryServerInfo,
+			inf1 *grpc.UnaryServerInfo,
 			handler grpc.UnaryHandler) (interface{}, error) {
+			inf1.FullMethod = inf1.FullMethod + "-DEANDEAN-A"
 			return handler(ctx, req)
 		}
 	case 1:
@@ -96,7 +98,9 @@ func ChainUnaryServer(
 			return func(
 				curCtx context.Context,
 				curReq interface{}) (interface{}, error) {
-				return cur(curCtx, curReq, info, nxt)
+				inf1 := *info
+				inf1.FullMethod = fmt.Sprintf("%s-DEANDEAN-B", info.FullMethod)
+				return cur(curCtx, curReq, &inf1, nxt)
 			}
 		}
 		c := handler
