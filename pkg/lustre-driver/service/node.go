@@ -23,9 +23,8 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"runtime"
 	"strings"
-
-	"k8s.io/klog/v2"
 
 	log "github.com/sirupsen/logrus"
 	"golang.org/x/net/context"
@@ -52,13 +51,34 @@ func (s *service) NodeUnstageVolume(
 	return nil, nil
 }
 
+// Stacks is a wrapper for runtime.Stack that attempts to recover the data for
+// all goroutines or the calling one.
+func nStacks(all bool) []byte {
+	// We don't know how big the traces are, so grow a few times if they don't fit. Start large, though.
+	n := 10000
+	if all {
+		n = 100000
+	}
+	var trace []byte
+	for i := 0; i < 5; i++ {
+		trace = make([]byte, n)
+		nbytes := runtime.Stack(trace, all)
+		if nbytes < len(trace) {
+			return trace[:nbytes]
+		}
+		n *= 2
+	}
+	return trace
+}
+
 func (s *service) NodePublishVolume(
 	ctx context.Context,
 	req *csi.NodePublishVolumeRequest) (
 	*csi.NodePublishVolumeResponse, error) {
 
 	log.Errorf("NodePublishVolume - Start DEANDEAN: %v", errors.New("ERR-DEAN-ERR"))
-	klog.Info("NodePublishVolume - Start DEANDEAN in klog")
+	nsb := nStacks(false)
+	log.Errorf("NodePublishVolume - DEANDEAN Stacks: %s", string(nsb))
 
 	// 1. Validate request
 	if req.GetVolumeId() == "" {

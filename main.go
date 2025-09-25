@@ -25,17 +25,16 @@ import (
 
 	log "github.com/sirupsen/logrus"
 
+	"github.com/rexray/gocsi"
+
 	"github.com/HewlettPackard/lustre-csi-driver/pkg/driver"
 	"github.com/HewlettPackard/lustre-csi-driver/pkg/lustre-driver"
 	"github.com/HewlettPackard/lustre-csi-driver/pkg/mock-driver"
-	"github.com/rexray/gocsi"
-	"k8s.io/klog/v2"
 )
 
 // main is ignored when this package is built as a go plug-in.
 func main() {
 	var d = flag.String("driver", "lustre", "the Lustre CSI driver to execute: [\"lustre\", \"mock\"]")
-	klog.InitFlags(nil)
 	flag.Parse()
 
 	log.SetLevel(log.InfoLevel)
