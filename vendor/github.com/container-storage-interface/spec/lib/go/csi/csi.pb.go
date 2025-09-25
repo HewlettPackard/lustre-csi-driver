@@ -6144,6 +6144,7 @@ func _Node_NodePublishVolume_Handler(srv interface{}, ctx context.Context, dec f
 		FullMethod: "/csi.v1.Node/NodePublishVolumeDEANDEAN",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		info.FullMethod = fmt.Sprintf("%s-INSIDE", info.FullMethod) // DEANDEAN
 		return srv.(NodeServer).NodePublishVolume(ctx, req.(*NodePublishVolumeRequest))
 	}
 	return interceptor(ctx, in, info, handler)
