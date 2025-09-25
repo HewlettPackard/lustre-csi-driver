@@ -54,13 +54,6 @@ func (s *service) NodePublishVolume(
 	req *csi.NodePublishVolumeRequest) (
 	*csi.NodePublishVolumeResponse, error) {
 
-	panic("XXX DEANDEAN")
-}
-
-func (s *service) xxNodePublishVolume(
-	ctx context.Context,
-	req *csi.NodePublishVolumeRequest) (
-	*csi.NodePublishVolumeResponse, error) {
 	// 1. Validate request
 	if req.GetVolumeId() == "" {
 		return nil, status.Errorf(codes.InvalidArgument, "NodePublishVolume - VolumeID is required")
