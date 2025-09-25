@@ -25,6 +25,8 @@ import (
 	"os"
 	"strings"
 
+	"k8s.io/klog/v2"
+
 	log "github.com/sirupsen/logrus"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc/codes"
@@ -56,6 +58,7 @@ func (s *service) NodePublishVolume(
 	*csi.NodePublishVolumeResponse, error) {
 
 	log.Errorf("NodePublishVolume - Start DEANDEAN: %v", errors.New("ERR-DEAN-ERR"))
+	klog.Info("NodePublishVolume - Start DEANDEAN in klog")
 
 	// 1. Validate request
 	if req.GetVolumeId() == "" {
