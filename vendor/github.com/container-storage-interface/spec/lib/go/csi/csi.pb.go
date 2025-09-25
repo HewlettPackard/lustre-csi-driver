@@ -6146,10 +6146,9 @@ func _Node_NodePublishVolume_Handler(srv interface{}, ctx context.Context, dec f
 		FullMethod: "/csi.v1.Node/NodePublishVolumeDEANDEAN",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		logrus.Info("DEANDEAN - Inside NodePublishVolume handler")  // DEANDEAN
-		info.FullMethod = fmt.Sprintf("%s-INSIDE", info.FullMethod) // DEANDEAN
+		logrus.Info("DEANDEAN - _Node_NodePublishVolume_Handler.handler") // DEANDEAN
 		x, a := srv.(NodeServer).NodePublishVolume(ctx, req.(*NodePublishVolumeRequest))
-		logrus.Infof("DEANDEAN - After NodePublishVolume call: %#v, %#v", x, a) // DEANDEAN
+		logrus.Infof("DEANDEAN - After _Node_NodePublishVolume_Handler.handler call: %#v, %#v", x, a) // DEANDEAN
 		return x, a
 	}
 	return interceptor(ctx, in, info, handler)

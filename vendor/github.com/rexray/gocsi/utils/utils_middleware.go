@@ -101,7 +101,7 @@ func ChainUnaryServer(
 				curCtx context.Context,
 				curReq interface{}) (interface{}, error) {
 				info.FullMethod = fmt.Sprintf("%s-DEANDEAN-B", info.FullMethod)
-				logrus.Info("DEANDEAN - Inside ChainUnaryServer, heading for intercept switch") // DEANDEAN
+				logrus.Info("DEANDEAN - utils_midleware.go:ChainUnaryServer, heading for intercept switch") // DEANDEAN
 
 				return cur(curCtx, curReq, info, nxt)
 			}

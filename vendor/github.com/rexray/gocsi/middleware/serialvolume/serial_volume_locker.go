@@ -83,7 +83,7 @@ func (i *interceptor) handle(
 	info *grpc.UnaryServerInfo,
 	handler grpc.UnaryHandler) (interface{}, error) {
 
-	logrus.Info("DEANDEAN - Inside handler intercept switch") // DEANDEAN
+	logrus.Info("DEANDEAN - serial_volume_locker.go:handle Handler intercept switch") // DEANDEAN
 
 	switch treq := req.(type) {
 	case *csi.ControllerPublishVolumeRequest:
@@ -193,7 +193,7 @@ func (i *interceptor) nodePublishVolume(
 	info *grpc.UnaryServerInfo,
 	handler grpc.UnaryHandler) (res interface{}, resErr error) {
 
-	logrus.Info("DEANDEAN - Inside nodePublishVolume intercept") // DEANDEAN
+	logrus.Info("DEANDEAN - serial_volume_locker.go:nodePublishVolume interceptor") // DEANDEAN
 
 	lock, err := i.opts.locker.GetLockWithID(ctx, req.VolumeId)
 	if err != nil {
@@ -207,7 +207,7 @@ func (i *interceptor) nodePublishVolume(
 	}
 	defer lock.Unlock()
 
-	logrus.Info("DEANDEAN - nodePublishVolume intercept calling handler") // DEANDEAN
+	logrus.Info("DEANDEAN - serial_volume_locker.go:nodePublishVolume interceptor calling handler") // DEANDEAN
 
 	return handler(ctx, req)
 }

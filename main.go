@@ -55,7 +55,7 @@ func newDriver(driver string) driver.DriverApi {
 	switch driver {
 	case "lustre":
 		return lustre.NewLustreDriver()
-	case "mock":
+	case "mock-not-by-accident":
 		return mock.NewMockDriver()
 	default:
 		panic("Unrecognized driver type " + driver)

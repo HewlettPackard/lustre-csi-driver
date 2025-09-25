@@ -134,8 +134,8 @@ func (s *service) NodePublishVolume(
 		err := mounter.Mount(
 			"/dev/vdb",
 			req.GetTargetPath(),
-			req.GetVolumeCapability().GetMount().GetFsType(),
-			req.GetVolumeCapability().GetMount().GetMountFlags())
+			"xfs", //req.GetVolumeCapability().GetMount().GetFsType(),
+			nil)   //req.GetVolumeCapability().GetMount().GetMountFlags())
 
 		if err != nil {
 			return nil, status.Errorf(codes.Internal, "NodePublishVolume - Mount Failed: Error %v", err)

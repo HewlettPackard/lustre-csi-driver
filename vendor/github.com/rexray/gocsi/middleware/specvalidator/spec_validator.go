@@ -174,10 +174,10 @@ func (s *interceptor) handleServer(
 	info *grpc.UnaryServerInfo,
 	handler grpc.UnaryHandler) (interface{}, error) {
 
-	log.Info("DEANDEAN - Inside handleServer") // DEANDEAN
+	log.Info("DEANDEAN - spec_validator.go:handleServer") // DEANDEAN
 
 	return s.handle(ctx, info.FullMethod, req, func() (interface{}, error) {
-		log.Info("DEANDEAN - Calling handleServers handler") // DEANDEAN
+		log.Info("DEANDEAN - spec_validator.go:handleServer:s.handle Calling handler") // DEANDEAN
 		return handler(ctx, req)
 	})
 }
@@ -202,7 +202,7 @@ func (s *interceptor) handle(
 	req interface{},
 	next func() (interface{}, error)) (interface{}, error) {
 
-	log.Info("DEANDEAN - Inside handleServers handler") // DEANDEAN
+	log.Info("DEANDEAN - spec_validator.go:handle handleServers handler") // DEANDEAN
 
 	// If the request is nil then pass control to the next handler
 	// in the chain.
@@ -212,7 +212,7 @@ func (s *interceptor) handle(
 
 	if s.opts.reqValidation {
 		// Validate the request against the CSI specification.
-		log.Info("DEANDEAN - Calling handleServers handler validateRequest") // DEANDEAN
+		log.Info("DEANDEAN - spec_validator.go:handle Calling handleServers handler validateRequest") // DEANDEAN
 
 		if err := s.validateRequest(ctx, method, req); err != nil {
 			return nil, err
@@ -222,7 +222,7 @@ func (s *interceptor) handle(
 	// Use the function passed into this one to get the response. On the
 	// server-side this could possibly invoke additional interceptors or
 	// the RPC. On the client side this invokes the RPC.
-	log.Info("DEANDEAN - Calling handleServers NEXT handler") // DEANDEAN
+	log.Info("DEANDEAN - spec_validator.go:handle Calling handleServers NEXT handler") // DEANDEAN
 
 	rep, err := next()
 
