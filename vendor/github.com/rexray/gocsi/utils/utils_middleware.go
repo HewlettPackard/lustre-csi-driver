@@ -98,9 +98,8 @@ func ChainUnaryServer(
 			return func(
 				curCtx context.Context,
 				curReq interface{}) (interface{}, error) {
-				inf1 := *info
-				inf1.FullMethod = fmt.Sprintf("%s-DEANDEAN-B", info.FullMethod)
-				return cur(curCtx, curReq, &inf1, nxt)
+				info.FullMethod = fmt.Sprintf("%s-DEANDEAN-B", info.FullMethod)
+				return cur(curCtx, curReq, info, nxt)
 			}
 		}
 		c := handler

@@ -20,6 +20,7 @@
 package service
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"strings"
@@ -53,6 +54,8 @@ func (s *service) NodePublishVolume(
 	ctx context.Context,
 	req *csi.NodePublishVolumeRequest) (
 	*csi.NodePublishVolumeResponse, error) {
+
+	log.Errorf("NodePublishVolume - Start DEANDEAN: %v", errors.New("ERR-DEAN-ERR"))
 
 	// 1. Validate request
 	if req.GetVolumeId() == "" {
