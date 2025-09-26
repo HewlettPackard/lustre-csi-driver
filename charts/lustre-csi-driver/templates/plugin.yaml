@@ -8,6 +8,7 @@ metadata:
     app.kubernetes.io/part-of: lustre-csi-driver
     app.kubernetes.io/name: lustre-csi-node
     app.kubernetes.io/component: plugin
+    app.kubernetes.io/version: {{ .Values.deployment.tag }}
 spec:
   selector:
     matchLabels:
@@ -22,6 +23,7 @@ spec:
         app.kubernetes.io/part-of: lustre-csi-driver
         app.kubernetes.io/name: lustre-csi-node
         app.kubernetes.io/component: plugin
+        app.kubernetes.io/version: {{ .Values.deployment.tag }}
     spec:
       initContainers:
         # When the CSI Driver hard crashes, it can leave around the socket used for communication between
