@@ -10,6 +10,7 @@ metadata:
     app.kubernetes.io/part-of: lustre-csi-driver
     app.kubernetes.io/name: lustre-csi.hpe.com
     app.kubernetes.io/component: csi-driver
+    app.kubernetes.io/version: {{ .Values.deployment.tag }}
 spec:
   # Indicates this CSI volume driver requires an attachment operation because it implements the CSI
   # ControllerPublishVolume() method, and that the Kubernetes attach/detach controller should call

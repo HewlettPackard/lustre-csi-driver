@@ -3,4 +3,6 @@ kind: Namespace
 metadata:
   labels:
     control-plane: controller-manager
+  annotations:
+    helm.sh/resource-policy: keep
   name: lustre-csi-system
