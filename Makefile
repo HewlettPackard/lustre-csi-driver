@@ -40,8 +40,7 @@ vet: ## Run go vet against code.
 
 build: VERSION ?= $(shell cat .version)
 build: .version fmt vet
-	go mod vendor
-	go build -o bin/lustre-csi-driver
+	go build -o bin/lustre-csi-driver ./pkg/hpelustreplugin
 
 run: fmt vet
 	go run ./main.go

@@ -17,7 +17,7 @@
 # limitations under the License.
 
 # Builder stage for compiling go source code
-FROM golang:1.23 AS builder
+FROM golang:1.24 AS builder
 
 WORKDIR /workspace
 
@@ -25,12 +25,11 @@ WORKDIR /workspace
 COPY go.mod go.sum ./
 
 # Copy the go source
-COPY main.go main.go
 COPY pkg/ pkg/
 COPY vendor/ vendor/
 
 # Build
-RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -a -o lustre-csi-driver main.go
+RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -a -o lustre-csi-driver ./pkg/hpelustreplugin
 
 ENTRYPOINT ["/bin/sh"]
 
