@@ -29,6 +29,7 @@ var NnfDriverName = "lustre-csi.hpe.com"
 
 var (
 	endpoint                 = flag.String("endpoint", "unix://tmp/csi.sock", "CSI endpoint")
+	nodeID                   = flag.String("nodeid", "", "node id")
 	version                  = flag.Bool("version", false, "Print the version and exit.")
 	driverName               = flag.String("drivername", NnfDriverName, "name of the driver")
 	enableHpeLustreMockMount = flag.Bool("enable-hpelustre-mock-mount", false, "Whether enable mock mount(only for testing)")
@@ -58,6 +59,7 @@ func main() {
 
 func handle() {
 	driverOptions := hpelustre.DriverOptions{
+		NodeID:                   *nodeID,
 		DriverName:               *driverName,
 		EnableHpeLustreMockMount: *enableHpeLustreMockMount,
 		WorkingMountDir:          *workingMountDir,

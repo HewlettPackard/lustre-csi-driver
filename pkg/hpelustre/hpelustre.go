@@ -80,6 +80,7 @@ type lustreVolume struct {
 
 // DriverOptions defines driver parameters specified in driver deployment
 type DriverOptions struct {
+	NodeID                   string
 	DriverName               string
 	EnableHpeLustreMockMount bool
 	WorkingMountDir          string
@@ -109,6 +110,7 @@ func NewDriver(options *DriverOptions) *Driver {
 	}
 	d.Name = options.DriverName
 	d.Version = driverVersion
+	d.NodeID = options.NodeID
 
 	d.DefaultControllerServer.Driver = &d.CSIDriver
 	d.DefaultIdentityServer.Driver = &d.CSIDriver
