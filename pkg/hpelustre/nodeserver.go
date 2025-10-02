@@ -553,6 +553,9 @@ func (d *Driver) createSubDir(vol *lustreVolume, mountPath, subDirPath string, m
 }
 
 func getSourceString(mgsIPAddress, azureLustreName string) string {
+	if strings.Contains(mgsIPAddress, "@") {
+		return fmt.Sprintf("%s:/%s", mgsIPAddress, azureLustreName)
+	}
 	return fmt.Sprintf("%s@tcp:/%s", mgsIPAddress, azureLustreName)
 }
 
