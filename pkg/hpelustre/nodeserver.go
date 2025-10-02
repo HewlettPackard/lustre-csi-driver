@@ -238,7 +238,7 @@ func mountVolumeAtPath(d *Driver, source, target string, mountOptions []string) 
 		source,
 		target,
 		"xfs",
-		mountOptions,
+		nil,
 		nil,
 		[]string{"--no-mtab"},
 	)
