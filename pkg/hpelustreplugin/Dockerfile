@@ -30,7 +30,7 @@ RUN make hpelustre-direct
 
 FROM ubuntu:22.04
 
-COPY --from=builder /workspace/hpelustreplugin /app/hpelustreplugin
+COPY --from=builder /workspace/bin/hpelustreplugin /app/hpelustreplugin
 COPY "./pkg/hpelustreplugin/entrypoint.sh" "/app/entrypoint.sh"
 
 RUN chmod +x "/app/entrypoint.sh"
