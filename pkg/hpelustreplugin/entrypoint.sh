@@ -64,7 +64,7 @@ function add_net_interfaces() {
   done
 }
 
-installClientPackages=${AZURELUSTRE_CSI_INSTALL_LUSTRE_CLIENT:-yes}
+installClientPackages=${HPELUSTRE_CSI_INSTALL_LUSTRE_CLIENT:-yes}
 echo "installClientPackages: ${installClientPackages}"
 
 requiredLustreVersion=${LUSTRE_VERSION:-"2.15.5"}

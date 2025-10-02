@@ -22,7 +22,7 @@ jobs:
 
     - name: "Checkout repository"
       id: checkout_repo
-      uses: actions/checkout@v3
+      uses: actions/checkout@v5
       with:
         fetch-depth: 0
         ref: ${{ github.event.pull_request.head.sha }}
@@ -64,7 +64,7 @@ jobs:
 
     - name: "Docker login"
       id: docker_login
-      uses: docker/login-action@v1
+      uses: docker/login-action@v3
       with:
         registry: ghcr.io
         username: ${{ github.actor }}
@@ -73,7 +73,7 @@ jobs:
     - name: "Build the test Docker image"
       id: docker_build_test_target
       if: ${{ env.DO_TEST == 'true' }}
-      uses: docker/build-push-action@v2
+      uses: docker/build-push-action@v6
       with:
         push: false
         target: ${{ env.TEST_TARGET }}
@@ -83,11 +83,17 @@ jobs:
       id: docker_test
       if: ${{ env.DO_TEST == 'true' }}
       run: docker run ${{ env.REPO_NAME }}:${{ env.TEST_TAG }}
+    
+    - name: "Make the plugin binary"
+      run: make hpelustre
 
     - name: "Build the final Docker image"
       id: docker_build
-      uses: docker/build-push-action@v3
+      uses: docker/build-push-action@v6
       with:
+        file: pkg/hpelustreplugin/Dockerfile
+        build-args: |
+          VERSION=${{ env.VERSION_TAG }}
         push: true
         tags: ${{ steps.meta.outputs.tags }}
 
@@ -97,7 +103,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Checkout
-      uses: actions/checkout@v4
+      uses: actions/checkout@v5
       with:
         fetch-tags: true
         fetch-depth: 0
@@ -106,7 +112,7 @@ jobs:
     - name: Verify that the tag is annotated
       run: if test x$(git for-each-ref ${{ github.ref }} | awk '{print $2}') = xtag; then /bin/true; else echo "\"${{ github.ref }}\" does not look like an annotated tag!"; /bin/false; fi
     - name: Release
-      uses: softprops/action-gh-release@v1
+      uses: softprops/action-gh-release@v2
       with:
         #prerelease: true
         generate_release_notes: true

@@ -12,9 +12,25 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+FROM golang:1.24 AS builder
+
+ARG VERSION=undefined
+
+WORKDIR /workspace
+
+# Copy the Go Modules manifests
+COPY Makefile go.mod go.sum ./
+
+# Copy the go source
+COPY pkg/ pkg/
+COPY vendor/ vendor/
+
+# Build
+RUN make hpelustre-direct
+
 FROM ubuntu:22.04
 
-COPY "./_output/hpelustreplugin" "/app/hpelustreplugin"
+COPY --from=builder /workspace/hpelustreplugin /app/hpelustreplugin
 COPY "./pkg/hpelustreplugin/entrypoint.sh" "/app/entrypoint.sh"
 
 RUN chmod +x "/app/entrypoint.sh"
