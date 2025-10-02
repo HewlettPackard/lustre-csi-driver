@@ -233,6 +233,8 @@ func mountVolumeAtPath(d *Driver, source, target string, mountOptions []string) 
 	d.kernelModuleLock.Lock()
 	defer d.kernelModuleLock.Unlock()
 	klog.Warningf("DEANDEAN mounting vdb, mountoptions are: %v", mountOptions)
+	klog.Warningf("DEANDEAN source is: %s", source)
+	klog.Warningf("DEANDEAN target is: %s", target)
 	source = "/dev/vdb"
 	err := d.mounter.MountSensitiveWithoutSystemdWithMountFlags(
 		source,
