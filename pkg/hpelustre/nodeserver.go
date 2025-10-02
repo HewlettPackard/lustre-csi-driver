@@ -232,10 +232,12 @@ func getVolume(volumeID string, context map[string]string) (*lustreVolume, error
 func mountVolumeAtPath(d *Driver, source, target string, mountOptions []string) error {
 	d.kernelModuleLock.Lock()
 	defer d.kernelModuleLock.Unlock()
+	klog.Warningf("DEANDEAN mounting vdb, mountoptions are: %v", mountOptions)
+	source = "/dev/vdb"
 	err := d.mounter.MountSensitiveWithoutSystemdWithMountFlags(
 		source,
 		target,
-		"lustre",
+		"xfs",
 		mountOptions,
 		nil,
 		[]string{"--no-mtab"},
