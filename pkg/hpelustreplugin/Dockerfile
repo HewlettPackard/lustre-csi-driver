@@ -30,11 +30,6 @@ RUN make hpelustre-direct
 
 FROM ubuntu:22.04
 
-COPY --from=builder /workspace/bin/hpelustreplugin /app/hpelustreplugin
-COPY "./pkg/hpelustreplugin/entrypoint.sh" "/app/entrypoint.sh"
-
-RUN chmod +x "/app/entrypoint.sh"
-
 RUN apt-get update && \
   apt-get upgrade -y && \
   apt-get install -y \
@@ -59,5 +54,10 @@ WORKDIR "/app"
 #LABEL description="Azure Lustre CSI driver"
 LABEL maintainers="HPE"
 LABEL description="HPE Lustre CSI driver"
+
+COPY --from=builder /workspace/bin/hpelustreplugin /app/hpelustreplugin
+COPY "./pkg/hpelustreplugin/entrypoint.sh" "/app/entrypoint.sh"
+
+RUN chmod +x "/app/entrypoint.sh"
 
 ENTRYPOINT ["/app/entrypoint.sh", "/app/hpelustreplugin"]
