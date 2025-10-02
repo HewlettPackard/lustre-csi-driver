@@ -83,9 +83,6 @@ jobs:
       id: docker_test
       if: ${{ env.DO_TEST == 'true' }}
       run: docker run ${{ env.REPO_NAME }}:${{ env.TEST_TAG }}
-    
-    - name: "Make the plugin binary"
-      run: make hpelustre
 
     - name: "Build the final Docker image"
       id: docker_build
