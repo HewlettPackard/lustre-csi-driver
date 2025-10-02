@@ -1,0 +1,9 @@
+---
+apiVersion: storage.k8s.io/v1
+kind: CSIDriver
+metadata:
+  name: lustre-csi.hpe.com
+spec:
+  fsGroupPolicy: File
+  attachRequired: false
+  podInfoOnMount: true

@@ -77,8 +77,8 @@ hpelustre-direct:
 .PHONY: container-linux
 container-linux: VERSION ?= $(shell cat .version)
 container-linux: .version fmt vet
-	docker buildx build --pull --output=type=$(OUTPUT_TYPE) --platform="linux/$(ARCH)" \
-		-t $(IMAGE_TAG_BASE):$(VERSION) --build-arg ARCH=$(ARCH) -f $(dockerfile) .
+	docker buildx build --platform="linux/$(ARCH)" \
+		-t $(IMAGE_TAG_BASE):$(VERSION) --build-arg VERSION=$(VERSION) --build-arg ARCH=$(ARCH) -f $(dockerfile) .
 
 
 

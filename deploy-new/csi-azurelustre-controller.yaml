@@ -1,0 +1,109 @@
+---
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  name: csi-hpelustre-controller
+  namespace: lustre-csi-system
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: csi-hpelustre-controller
+  template:
+    metadata:
+      labels:
+        app: csi-hpelustre-controller
+    spec:
+      hostNetwork: true
+      serviceAccountName: csi-hpelustre-controller-sa
+      priorityClassName: system-cluster-critical
+      containers:
+        - name: csi-provisioner
+          image: registry.k8s.io/sig-storage/csi-provisioner:v5.1.0
+          imagePullPolicy: IfNotPresent
+          args:
+            - "-v=2"
+            - "--csi-address=$(ADDRESS)"
+            - "--leader-election"
+            - "--timeout=15m"
+            - "--extra-create-metadata=true"
+          env:
+            - name: ADDRESS
+              value: /csi/csi.sock
+          volumeMounts:
+            - mountPath: /csi
+              name: socket-dir
+          resources:
+            limits:
+              cpu: 100m
+              memory: 300Mi
+            requests:
+              cpu: 10m
+              memory: 20Mi
+        - name: liveness-probe
+          image: registry.k8s.io/sig-storage/livenessprobe:v2.14.0
+          imagePullPolicy: IfNotPresent
+          args:
+            - --csi-address=/csi/csi.sock
+            - --probe-timeout=120s
+            - --health-port=29762
+          volumeMounts:
+            - name: socket-dir
+              mountPath: /csi
+          resources:
+            limits:
+              cpu: 100m
+              memory: 100Mi
+            requests:
+              cpu: 10m
+              memory: 20Mi
+        - name: hpelustre
+          image: ghcr.io/hewlettpackard/lustre-csi-driver:0.0.0.114-504f
+          imagePullPolicy: IfNotPresent
+          args:
+            - "-v=5"
+            - "--endpoint=$(CSI_ENDPOINT)"
+          ports:
+            - containerPort: 29762
+              name: healthz
+              protocol: TCP
+          livenessProbe:
+            failureThreshold: 5
+            httpGet:
+              path: /healthz
+              port: healthz
+            initialDelaySeconds: 60
+            timeoutSeconds: 10
+            periodSeconds: 30
+          env:
+            - name: CSI_ENDPOINT
+              value: unix:///csi/csi.sock
+            - name: HPELUSTRE_CSI_INSTALL_LUSTRE_CLIENT
+              value: "no"
+          securityContext:
+            privileged: true
+          volumeMounts:
+            - mountPath: /csi
+              name: socket-dir
+            - mountPath: /etc/kubernetes/
+              name: hpe-cred
+            - mountPath: /etc/host-os-release
+              name: host-os-release
+          resources:
+            limits:
+              cpu: 1
+              memory: 200Mi
+            requests:
+              cpu: 10m
+              memory: 20Mi
+      volumes:
+        - name: socket-dir
+          emptyDir: {}
+        - name: hpe-cred
+          hostPath:
+            path: /etc/kubernetes/
+            type: DirectoryOrCreate
+        - name: host-os-release
+          hostPath:
+            path: /etc/os-release
+            type: File

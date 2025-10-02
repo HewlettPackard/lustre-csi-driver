@@ -14,8 +14,6 @@
 
 FROM golang:1.24 AS builder
 
-ARG VERSION=undefined
-
 WORKDIR /workspace
 
 # Copy the Go Modules manifests
@@ -26,6 +24,7 @@ COPY pkg/ pkg/
 COPY vendor/ vendor/
 
 # Build
+ARG VERSION=undefined
 RUN make hpelustre-direct
 
 FROM ubuntu:22.04
@@ -50,14 +49,17 @@ RUN apt-get update && \
 
 WORKDIR "/app"
 
-#LABEL maintainers="dabradley;t-mialve"
-#LABEL description="Azure Lustre CSI driver"
 LABEL maintainers="HPE"
 LABEL description="HPE Lustre CSI driver"
 
-COPY --from=builder /workspace/bin/hpelustreplugin /app/hpelustreplugin
 COPY "./pkg/hpelustreplugin/entrypoint.sh" "/app/entrypoint.sh"
-
 RUN chmod +x "/app/entrypoint.sh"
+
+# Add Cray-built mount.lustre binary to layer
+# See mount.lustre description in sbin/README.md
+COPY sbin/mount.lustre-cray /sbin/mount.lustre
+
+# By now the plugin build in the "builder" stage should have completed.
+COPY --from=builder /workspace/bin/hpelustreplugin /app/hpelustreplugin
 
 ENTRYPOINT ["/app/entrypoint.sh", "/app/hpelustreplugin"]
