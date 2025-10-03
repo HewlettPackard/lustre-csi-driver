@@ -235,12 +235,11 @@ func mountVolumeAtPath(d *Driver, source, target string, mountOptions []string) 
 	klog.Warningf("DEANDEAN mounting vdb, mountoptions are: %v", mountOptions)
 	klog.Warningf("DEANDEAN source is: %s", source)
 	klog.Warningf("DEANDEAN target is: %s", target)
-	source = "/dev/vdb"
 	err := d.mounter.MountSensitiveWithoutSystemdWithMountFlags(
 		source,
 		target,
-		"xfs",
-		nil,
+		"lustre",
+		mountOptions,
 		nil,
 		[]string{"--no-mtab"},
 	)
