@@ -39,6 +39,52 @@ spec:
             - name: socket-dir
               mountPath: /csi
       containers:
+        - name: csi-node-driver
+          image: controller:latest
+          imagePullPolicy: IfNotPresent
+          args:
+            - "-v=5"
+            - "--endpoint=$(CSI_ENDPOINT)"
+            - "--nodeid=$(KUBE_NODE_NAME)"
+          ports:
+            - containerPort: 29763
+              name: healthz
+              protocol: TCP
+          livenessProbe:
+            failureThreshold: 5
+            httpGet:
+              path: /healthz
+              port: healthz
+            initialDelaySeconds: 60
+            timeoutSeconds: 10
+            periodSeconds: 30
+          env:
+            - name: CSI_ENDPOINT
+              value: unix:///csi/csi.sock
+            - name: KUBE_NODE_NAME
+              valueFrom:
+                fieldRef:
+                  apiVersion: v1
+                  fieldPath: spec.nodeName
+          securityContext:
+            privileged: true
+          volumeMounts:
+            - mountPath: /csi
+              name: socket-dir
+            - mountPath: /var/lib/kubelet/
+              name: mountpoint-dir
+              mountPropagation: "Bidirectional"
+            - mountPath: /etc/kubernetes/
+              name: hpe-cred
+            - mountPath: /dev
+              name: host-dev
+          resources:
+            limits:
+              cpu: 1
+              memory: 200Mi
+            requests:
+              cpu: 10m
+              memory: 20Mi
         - name: liveness-probe
           volumeMounts:
             - mountPath: /csi
@@ -86,52 +132,6 @@ spec:
             limits:
               cpu: 100m
               memory: 100Mi
-            requests:
-              cpu: 10m
-              memory: 20Mi
-        - name: csi-node-driver
-          image: controller:master
-          imagePullPolicy: IfNotPresent
-          args:
-            - "-v=5"
-            - "--endpoint=$(CSI_ENDPOINT)"
-            - "--nodeid=$(KUBE_NODE_NAME)"
-          ports:
-            - containerPort: 29763
-              name: healthz
-              protocol: TCP
-          livenessProbe:
-            failureThreshold: 5
-            httpGet:
-              path: /healthz
-              port: healthz
-            initialDelaySeconds: 60
-            timeoutSeconds: 10
-            periodSeconds: 30
-          env:
-            - name: CSI_ENDPOINT
-              value: unix:///csi/csi.sock
-            - name: KUBE_NODE_NAME
-              valueFrom:
-                fieldRef:
-                  apiVersion: v1
-                  fieldPath: spec.nodeName
-          securityContext:
-            privileged: true
-          volumeMounts:
-            - mountPath: /csi
-              name: socket-dir
-            - mountPath: /var/lib/kubelet/
-              name: mountpoint-dir
-              mountPropagation: "Bidirectional"
-            - mountPath: /etc/kubernetes/
-              name: hpe-cred
-            - mountPath: /dev
-              name: host-dev
-          resources:
-            limits:
-              cpu: 1
-              memory: 200Mi
             requests:
               cpu: 10m
               memory: 20Mi
