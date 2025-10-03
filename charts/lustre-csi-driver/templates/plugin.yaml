@@ -30,9 +30,6 @@ spec:
         app.kubernetes.io/component: plugin
         app.kubernetes.io/version: {{ .Values.deployment.tag }}
     spec:
-      hostNetwork: true
-      dnsPolicy: Default
-      serviceAccountName: csi-hpelustre-node-sa
       priorityClassName: system-node-critical
       containers:
         - name: liveness-probe
