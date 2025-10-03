@@ -551,11 +551,17 @@ func (d *Driver) createSubDir(vol *lustreVolume, mountPath, subDirPath string, m
 	return nil
 }
 
-func getSourceString(mgsIPAddress, azureLustreName string) string {
-	if strings.Contains(mgsIPAddress, "@") {
-		return fmt.Sprintf("%s:/%s", mgsIPAddress, azureLustreName)
+func getSourceString(mgsIPAddress, lustreName string) string {
+	if lustreName[0] != '/' {
+		lustreName = "/" + lustreName
 	}
-	return fmt.Sprintf("%s@tcp:/%s", mgsIPAddress, azureLustreName)
+	var src string
+	if strings.Contains(mgsIPAddress, "@") {
+		src = fmt.Sprintf("%s:%s", mgsIPAddress, lustreName)
+	} else {
+		src = fmt.Sprintf("%s@tcp:%s", mgsIPAddress, lustreName)
+	}
+	return src
 }
 
 func getInternalMountPath(workingMountDir, mountPath string) (string, error) {
