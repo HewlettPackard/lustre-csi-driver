@@ -4,7 +4,6 @@ metadata:
   # This name must match the name of the CSI SP, found in service/service.go.
   # Then any PV may reference this in its own spec.csi.driver.
   name: lustre-csi.hpe.com
-  namespace: lustre-csi-system
   labels:
     app.kubernetes.io/instance: lustre-csi.hpe.com
     app.kubernetes.io/part-of: lustre-csi-driver
