@@ -232,7 +232,7 @@ func getVolume(volumeID string, context map[string]string) (*lustreVolume, error
 func mountVolumeAtPath(d *Driver, source, target string, mountOptions []string) error {
 	d.kernelModuleLock.Lock()
 	defer d.kernelModuleLock.Unlock()
-	klog.Warningf("DEANDEAN mounting vdb, mountoptions are: %v", mountOptions)
+	klog.Warningf("DEANDEAN mountoptions are: %v", mountOptions)
 	klog.Warningf("DEANDEAN source is: %s", source)
 	klog.Warningf("DEANDEAN target is: %s", target)
 	err := d.mounter.MountSensitiveWithoutSystemdWithMountFlags(
@@ -702,7 +702,7 @@ func newLustreVolume(volumeID, volumeName string, params map[string]string) (*lu
 	vol := &lustreVolume{
 		name:          volumeName,
 		mgsIPAddress:  mgsIPAddress,
-		hpeLustreName: DefaultLustreFsName,
+		hpeLustreName: volumeID, // DefaultLustreFsName,
 		subDir:        subDir,
 		id:            volumeID,
 	}
