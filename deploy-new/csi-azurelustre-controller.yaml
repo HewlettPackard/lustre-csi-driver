@@ -2,6 +2,8 @@
 kind: Deployment
 apiVersion: apps/v1
 metadata:
+  labels:
+    app: csi-hpelustre-controller
   name: csi-hpelustre-controller
   namespace: lustre-csi-system
 spec:
@@ -58,7 +60,7 @@ spec:
               cpu: 10m
               memory: 20Mi
         - name: hpelustre
-          image: ghcr.io/hewlettpackard/lustre-csi-driver:0.0.0.114-504f
+          image: ghcr.io/hewlettpackard/lustre-csi-driver:0.0.0.124-b7fb
           imagePullPolicy: IfNotPresent
           args:
             - "-v=5"
