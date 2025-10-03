@@ -45,6 +45,7 @@ func (d *Driver) NodePublishVolume(
 			"Volume capability missing in request")
 	}
 	userMountFlags := volCap.GetMount().GetMountFlags()
+	volumeType := volCap.GetMount().GetFsType()
 
 	volumeID := req.GetVolumeId()
 	if len(volumeID) == 0 {
@@ -69,7 +70,8 @@ func (d *Driver) NodePublishVolume(
 		return nil, err
 	}
 
-	source := getSourceString(vol.mgsIPAddress, vol.hpeLustreName)
+	//source := getSourceString(vol.mgsIPAddress, vol.hpeLustreName)
+	source := volumeID
 
 	mountOptions, readOnly := getMountOptions(req, userMountFlags)
 
@@ -119,9 +121,13 @@ func (d *Driver) NodePublishVolume(
 		return &csi.NodePublishVolumeResponse{}, nil
 	}
 
+	//klog.V(2).Infof(
+	//	"NodePublishVolume: volume %s mounting %s at %s with mountOptions: %v",
+	//	volumeID, source, target, mountOptions,
+	//)
 	klog.V(2).Infof(
-		"NodePublishVolume: volume %s mounting %s at %s with mountOptions: %v",
-		volumeID, source, target, mountOptions,
+		"NodePublishVolume: volume %s mounting at %s, type %s, with mountOptions: %v",
+		source, target, volumeType, mountOptions,
 	)
 	if d.enableHpeLustreMockMount {
 		klog.Warningf(
@@ -136,7 +142,7 @@ func (d *Driver) NodePublishVolume(
 		return &csi.NodePublishVolumeResponse{}, nil
 	}
 
-	err = mountVolumeAtPath(d, source, target, mountOptions)
+	err = mountVolumeAtPath(d, source, target, volumeType, mountOptions)
 	if err != nil {
 		if removeErr := os.Remove(target); removeErr != nil {
 			return nil, status.Errorf(
@@ -150,9 +156,14 @@ func (d *Driver) NodePublishVolume(
 			"Could not mount %q at %q: %v", source, target, err)
 	}
 
+	//klog.V(2).Infof(
+	//	"NodePublishVolume: volume %s mount %s at %s successfully",
+	//	volumeID,
+	//	source,
+	//	target,
+	//)
 	klog.V(2).Infof(
-		"NodePublishVolume: volume %s mount %s at %s successfully",
-		volumeID,
+		"NodePublishVolume: volume mount %s at %s successfully",
 		source,
 		target,
 	)
@@ -208,6 +219,10 @@ func getMountOptions(req *csi.NodePublishVolumeRequest, userMountFlags []string)
 }
 
 func getVolume(volumeID string, context map[string]string) (*lustreVolume, error) {
+	return &lustreVolume{}, nil
+}
+
+func xx_getVolume(volumeID string, context map[string]string) (*lustreVolume, error) {
 	volName := ""
 
 	volFromID, err := getLustreVolFromID(volumeID)
@@ -229,16 +244,17 @@ func getVolume(volumeID string, context map[string]string) (*lustreVolume, error
 	return vol, nil
 }
 
-func mountVolumeAtPath(d *Driver, source, target string, mountOptions []string) error {
+func mountVolumeAtPath(d *Driver, source, target string, volumeType string, mountOptions []string) error {
 	d.kernelModuleLock.Lock()
 	defer d.kernelModuleLock.Unlock()
 	klog.Warningf("DEANDEAN mountoptions are: %v", mountOptions)
 	klog.Warningf("DEANDEAN source is: %s", source)
 	klog.Warningf("DEANDEAN target is: %s", target)
+	klog.Warningf("DEANDEAN volumeType is: %s", volumeType)
 	err := d.mounter.MountSensitiveWithoutSystemdWithMountFlags(
 		source,
 		target,
-		"lustre",
+		volumeType, // "lustre",
 		mountOptions,
 		nil,
 		[]string{"--no-mtab"},
@@ -634,7 +650,7 @@ func (d *Driver) internalMount(vol *lustreVolume, mountPath string, mountOptions
 		vol.id, source, target, mountOptions,
 	)
 
-	err = mountVolumeAtPath(d, source, target, mountOptions)
+	err = mountVolumeAtPath(d, source, target, "lustre", mountOptions)
 	if err != nil {
 		if removeErr := os.Remove(target); removeErr != nil {
 			return status.Errorf(
