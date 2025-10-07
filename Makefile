@@ -40,16 +40,10 @@ vet: ## Run go vet against code.
 
 build: VERSION ?= $(shell cat .version)
 build: .version fmt vet
-	go build -o bin/lustre-csi-driver ./pkg/hpelustreplugin
+	go build -o bin/hpelustreplugin ./pkg/hpelustreplugin
 
 run: fmt vet
-	go run ./main.go
-
-docker-build: VERSION ?= $(shell cat .version)
-docker-build: .version Dockerfile fmt vet
-	time ${DOCKER} build -t $(IMAGE_TAG_BASE):$(VERSION) .
-
-
+	go run ./pkg/hpelustreplugin
 
 # The current context of image building
 # The architecture of the image
@@ -59,28 +53,24 @@ OUTPUT_TYPE ?= registry
 
 PKG = github.com/HewlettPackard/lustre-csi-driver
 
-
 dockerfile = ./pkg/hpelustreplugin/Dockerfile
-
 
 .PHONY: hpelustre
 hpelustre: VERSION ?= $(shell cat .version)
 hpelustre: .version fmt vet
 hpelustre: hpelustre-direct
 
+# hpelustre-direct is called by the Dockerfile.
+.PHONY: hpelustre-direct
 hpelustre-direct:
 	LDFLAGS="-X ${PKG}/pkg/hpelustre.driverVersion=${VERSION} -s -w -extldflags '-static'" \
 	CGO_ENABLED=0 GOOS=linux GOARCH=$(ARCH) go build -a -ldflags="-X '$(PKG)/pkg/hpelustre.driverVersion=$(VERSION)' -s -w -extldflags -static" -mod vendor -o bin/hpelustreplugin ./pkg/hpelustreplugin
 
-
-
-.PHONY: container-linux
-container-linux: VERSION ?= $(shell cat .version)
-container-linux: .version fmt vet
+.PHONY: docker-build
+docker-build: VERSION ?= $(shell cat .version)
+docker-build: .version fmt vet
 	docker buildx build --platform="linux/$(ARCH)" \
 		-t $(IMAGE_TAG_BASE):$(VERSION) --build-arg VERSION=$(VERSION) --build-arg ARCH=$(ARCH) -f $(dockerfile) .
-
-
 
 edit-image: VERSION ?= $(shell cat .version)
 edit-image: .version ## Replace plugin.yaml image with name "controller" -> ghcr tagged container reference
