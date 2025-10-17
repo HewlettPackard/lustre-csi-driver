@@ -25,6 +25,6 @@ spec:
     # formats based on the networking interface type. Example formats:
     # - RoCE = <ip_addr>@tcp:/<fs_name>,
     # - Infiniband = <ip_addr>@o2ib:/<fs_name>
-    volumeHandle: "172.0.0.1@tcp:/maui"
+    volumeHandle: "10.1.1.113@tcp:/lushtx"
     # Filesystem type to mount. Must be a filesystem type supported by the host operating system. Ex. "ext4", "xfs", "ntfs".
     fsType: lustre

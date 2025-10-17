@@ -87,9 +87,9 @@ type DriverOptions struct {
 
 	// Used for testing. Allows the .spec.csi.volumeHandle to be swapped with
 	// another value.
-	SwapSourceFrom   string
-	SwapSourceTo     string
-	SwapSourceToType string
+	SwapSourceFrom     string
+	SwapSourceTo       string
+	SwapSourceToFSType string
 }
 
 // Driver implements all interfaces of CSI drivers
@@ -109,9 +109,9 @@ type Driver struct {
 	// Used for testing. Allows the .spec.csi.volumeHandle to be swapped with
 	// another value. The "type" indicates the type of the new volume
 	// (e.g., "xfs", "ext4", etc.).
-	swapSourceFrom   string
-	swapSourceTo     string
-	swapSourceToType string
+	swapSourceFrom     string
+	swapSourceTo       string
+	swapSourceToFSType string
 }
 
 // NewDriver Creates a NewCSIDriver object. Assumes vendor version is equal to driver version &
@@ -131,7 +131,7 @@ func NewDriver(options *DriverOptions) *Driver {
 
 	d.swapSourceFrom = options.SwapSourceFrom
 	d.swapSourceTo = options.SwapSourceTo
-	d.swapSourceToType = options.SwapSourceToType
+	d.swapSourceToFSType = options.SwapSourceToFSType
 
 	return &d
 }

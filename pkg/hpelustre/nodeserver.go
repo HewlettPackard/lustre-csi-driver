@@ -247,17 +247,12 @@ func xx_getVolume(volumeID string, context map[string]string) (*lustreVolume, er
 func mountVolumeAtPath(d *Driver, source, target string, volumeType string, mountOptions []string) error {
 	d.kernelModuleLock.Lock()
 	defer d.kernelModuleLock.Unlock()
-	klog.Warningf("DEANDEAN mountoptions are: %v", mountOptions)
-	klog.Warningf("DEANDEAN source is: %s", source)
-	klog.Warningf("DEANDEAN target is: %s", target)
-	klog.Warningf("DEANDEAN volumeType is: %s", volumeType)
+	klog.Infof("Mount source '%s' (%s) at '%s', with options (%s)", source, volumeType, target, mountOptions)
 	if d.swapSourceFrom != "" && source == d.swapSourceFrom {
-		klog.Warningf("Swapping PV source '%s' to '%s' (%s) in mountVolumeAtPath", d.swapSourceFrom, d.swapSourceTo, d.swapSourceToType)
+		klog.Warningf("Swapping source '%s' to '%s' (%s) in mountVolumeAtPath", d.swapSourceFrom, d.swapSourceTo, d.swapSourceToType)
 		source = d.swapSourceTo
-		volumeType = d.swapSourceToType
+		volumeType = d.swapSourceToFSType
 	}
-	klog.Warningf("DEANDEAN 2 source is: %s", source)
-	klog.Warningf("DEANDEAN 2 volumeType is: %s", volumeType)
 	err := d.mounter.MountSensitiveWithoutSystemdWithMountFlags(
 		source,
 		target,
