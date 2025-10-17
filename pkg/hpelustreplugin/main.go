@@ -68,10 +68,13 @@ func main() {
 	if swapSourceTo != nil && *swapSourceTo != "" {
 		swapDst = *swapSourceTo
 	}
+	if swapSourceToType != nil && *swapSourceToType != "" {
+		swapDstType = *swapSourceToType
+	}
 	if swapSrc != "" && swapDst == "" || swapSrc == "" && swapDst != "" {
 		klog.Fatalln("Both --swap-source-from and --swap-source-to must be specified together")
 	}
-	if swapDst != "" && swapSourceToType == nil || *swapSourceToType == "" {
+	if swapDst != "" && swapDstType == "" {
 		klog.Fatalln("--swap-source-to-type must be specified when --swap-source-to is used")
 	}
 	if swapSrc != "" && swapDst != "" {
