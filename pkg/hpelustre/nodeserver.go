@@ -251,9 +251,10 @@ func mountVolumeAtPath(d *Driver, source, target string, volumeType string, moun
 	klog.Warningf("DEANDEAN source is: %s", source)
 	klog.Warningf("DEANDEAN target is: %s", target)
 	klog.Warningf("DEANDEAN volumeType is: %s", volumeType)
-	if strings.Contains(source, "lushtx") {
-		source = "/dev/vdb"
-		volumeType = "xfs"
+	if d.swapSourceFrom != "" && source == d.swapSourceFrom {
+		klog.Warningf("Swapping PV source '%s' to '%s' (%s) in mountVolumeAtPath", d.swapSourceFrom, d.swapSourceTo, d.swapSourceToType)
+		source = d.swapSourceTo
+		volumeType = d.swapSourceToType
 	}
 	klog.Warningf("DEANDEAN 2 source is: %s", source)
 	klog.Warningf("DEANDEAN 2 volumeType is: %s", volumeType)

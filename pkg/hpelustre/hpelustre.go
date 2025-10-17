@@ -84,6 +84,12 @@ type DriverOptions struct {
 	DriverName               string
 	EnableHpeLustreMockMount bool
 	WorkingMountDir          string
+
+	// Used for testing. Allows the .spec.csi.volumeHandle to be swapped with
+	// another value.
+	SwapSourceFrom   string
+	SwapSourceTo     string
+	SwapSourceToType string
 }
 
 // Driver implements all interfaces of CSI drivers
@@ -99,6 +105,13 @@ type Driver struct {
 	// Directory to temporarily mount to for subdirectory creation
 	workingMountDir  string
 	kernelModuleLock sync.Mutex
+
+	// Used for testing. Allows the .spec.csi.volumeHandle to be swapped with
+	// another value. The "type" indicates the type of the new volume
+	// (e.g., "xfs", "ext4", etc.).
+	swapSourceFrom   string
+	swapSourceTo     string
+	swapSourceToType string
 }
 
 // NewDriver Creates a NewCSIDriver object. Assumes vendor version is equal to driver version &
@@ -115,6 +128,10 @@ func NewDriver(options *DriverOptions) *Driver {
 	d.DefaultControllerServer.Driver = &d.CSIDriver
 	d.DefaultIdentityServer.Driver = &d.CSIDriver
 	d.DefaultNodeServer.Driver = &d.CSIDriver
+
+	d.swapSourceFrom = options.SwapSourceFrom
+	d.swapSourceTo = options.SwapSourceTo
+	d.swapSourceToType = options.SwapSourceToType
 
 	return &d
 }

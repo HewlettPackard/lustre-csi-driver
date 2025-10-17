@@ -28,12 +28,21 @@ import (
 var NnfDriverName = "lustre-csi.hpe.com"
 
 var (
+	swapSrc     = ""
+	swapDst     = ""
+	swapDstType = ""
+)
+
+var (
 	endpoint                 = flag.String("endpoint", "unix://tmp/csi.sock", "CSI endpoint")
 	nodeID                   = flag.String("nodeid", "", "node id")
 	version                  = flag.Bool("version", false, "Print the version and exit.")
 	driverName               = flag.String("drivername", NnfDriverName, "name of the driver")
 	enableHpeLustreMockMount = flag.Bool("enable-hpelustre-mock-mount", false, "Whether enable mock mount(only for testing)")
 	workingMountDir          = flag.String("working-mount-dir", "/tmp", "working directory for provisioner to mount lustre filesystems temporarily")
+	swapSourceFrom           = flag.String("swap-source-from", "", "source as specified in PV's spec.csi.volumeHandle to be swapped")
+	swapSourceTo             = flag.String("swap-source-to", "", "source to be used in place of the PV's spec.csi.volumeHandle")
+	swapSourceToType         = flag.String("swap-source-to-type", "", "fs type of the --swap-source-to volume")
 )
 
 func main() {
@@ -53,6 +62,22 @@ func main() {
 		os.Exit(0)
 	}
 
+	if swapSourceFrom != nil && *swapSourceFrom != "" {
+		swapSrc = *swapSourceFrom
+	}
+	if swapSourceTo != nil && *swapSourceTo != "" {
+		swapDst = *swapSourceTo
+	}
+	if swapSrc != "" && swapDst == "" || swapSrc == "" && swapDst != "" {
+		klog.Fatalln("Both --swap-source-from and --swap-source-to must be specified together")
+	}
+	if swapDst != "" && swapSourceToType == nil || *swapSourceToType == "" {
+		klog.Fatalln("--swap-source-to-type must be specified when --swap-source-to is used")
+	}
+	if swapSrc != "" && swapDst != "" {
+		klog.Infof("Swapping source '%s' to '%s' (%s) in volume handles", swapSrc, swapDst, swapDstType)
+	}
+
 	handle()
 	os.Exit(0)
 }
@@ -63,6 +88,9 @@ func handle() {
 		DriverName:               *driverName,
 		EnableHpeLustreMockMount: *enableHpeLustreMockMount,
 		WorkingMountDir:          *workingMountDir,
+		SwapSourceFrom:           swapSrc,
+		SwapSourceTo:             swapDst,
+		SwapSourceToType:         swapDstType,
 	}
 	driver := hpelustre.NewDriver(&driverOptions)
 	if driver == nil {
