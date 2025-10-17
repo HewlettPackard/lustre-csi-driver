@@ -249,7 +249,7 @@ func mountVolumeAtPath(d *Driver, source, target string, volumeType string, moun
 	defer d.kernelModuleLock.Unlock()
 	klog.Infof("Mount source '%s' (%s) at '%s', with options (%s)", source, volumeType, target, mountOptions)
 	if d.swapSourceFrom != "" && source == d.swapSourceFrom {
-		klog.Warningf("Swapping source '%s' to '%s' (%s) in mountVolumeAtPath", d.swapSourceFrom, d.swapSourceTo, d.swapSourceToType)
+		klog.Warningf("Swapping source '%s' to '%s' (%s) in mountVolumeAtPath", d.swapSourceFrom, d.swapSourceTo, d.swapSourceToFSType)
 		source = d.swapSourceTo
 		volumeType = d.swapSourceToFSType
 	}
