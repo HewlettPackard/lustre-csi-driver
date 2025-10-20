@@ -116,3 +116,28 @@ Note the `--swap-source-from` argument matches the `.spec.csi.volumeHandle` spec
 ```
 
 The application will refer to the original PV which specifies the Lustre nid, but will end up with the /dev/vdb XFS filesystem mounted, instead.
+
+## Read-Only Mount
+
+When considering read-only mounts, recall that on a single host, Linux does not allow the same volume to be mounted "rw" on one mountpoint and "ro" on another mountpoint.
+
+Details:
+
+- Pod `.spec.volumes[].persistentVolumeClaim.readOnly`:
+  Volume is mounted with "ro" mount option. This affects all containers in the pod. CRI-O knows it's read-only and doesn't attempt the selinux relabel.
+
+- Pod `.spec.containers[].volumeMounts[].readOnly`:
+  Volume is mounted with "rw" mount option. But it's read-only in this individual container.
+
+- PV `.spec.csi.readOnly`:
+  This is passed to the ControllerPublishVolumeRequest endpoint in the CSI driver. This CSI driver does not support this endpoint.
+
+- PV `.spec.mountOptions`
+  Additional mount options. Supported with csi, iscsi, and nfs. If "ro" is specified, then the volume is mounted with "ro" mount option. CRI-O doesn't know it's read-only and wants to do the selinux relabel, but cannot write to the volume, and it fails to setup the container.
+
+- PVC does not have an equivalent of PV's `.spec.mountOptions`.
+
+- PV `.spec.accessModes` does not control or constrain the mount options. This is used to
+advise the k8s scheduler about pod placement.
+
+- PVC `.spec.accessModes` is loosely used to match a PV. The PV access mode is what matters.
