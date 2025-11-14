@@ -1,3 +1,4 @@
+---
 kind: DaemonSet
 apiVersion: apps/v1
 metadata:
@@ -16,6 +17,10 @@ spec:
       app.kubernetes.io/part-of: lustre-csi-driver
       app.kubernetes.io/name: lustre-csi-node
       app.kubernetes.io/component: plugin
+  updateStrategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: "25%"
   template:
     metadata:
       labels:
@@ -25,6 +30,7 @@ spec:
         app.kubernetes.io/component: plugin
         app.kubernetes.io/version: {{ .Values.deployment.tag }}
     spec:
+      priorityClassName: system-node-critical
       initContainers:
         # When the CSI Driver hard crashes, it can leave around the socket used for communication between
         # the driver and the registrar, causing future driver executables to fail as the unix socket is
@@ -39,94 +45,118 @@ spec:
       containers:
         - name: csi-node-driver
           image: {{ .Values.deployment.image }}:{{ .Values.deployment.tag }}
+          imagePullPolicy: IfNotPresent
           args:
-           - --driver=lustre
-          securityContext:
-            # This is necessary only for systems with SELinux, where the CSI driver needs
-            # to mount the mount-dir with bidirectional mount propagation.
-            privileged: true
+            - "-v=5"
+            - "--endpoint=$(CSI_ENDPOINT)"
+            - "--nodeid=$(KUBE_NODE_NAME)"
+          ports:
+            - containerPort: 29763
+              name: healthz
+              protocol: TCP
+          livenessProbe:
+            failureThreshold: 5
+            httpGet:
+              path: /healthz
+              port: healthz
+            initialDelaySeconds: 60
+            timeoutSeconds: 10
+            periodSeconds: 30
           env:
             - name: CSI_ENDPOINT
               value: unix:///csi/csi.sock
-            - name: X_CSI_DEBUG
-              value: "true"
-            - name: X_CSI_SPEC_DISABLE_LEN_CHECK
-              value: "true"
             - name: KUBE_NODE_NAME
               valueFrom:
                 fieldRef:
                   apiVersion: v1
                   fieldPath: spec.nodeName
-          volumeMounts:
-            - name: socket-dir
-              mountPath: /csi
-            - name: mountpoint-dir
-              mountPath: /var/lib/kubelet/pods
-              mountPropagation: Bidirectional
-            - name: plugins-dir
-              mountPath: /var/lib/kubelet/plugins
-              mountPropagation: Bidirectional
-            - name: dev-dir
-              mountPath: /dev
-              mountPropagation: HostToContainer
-            - name: mnt-dir
-              mountPath: /mnt
-              mountPropagation: Bidirectional
-
-        # The node-driver-registrar is a sidecar container that registers the CSI driver with Kubelet
-        # using the kubelet plugin registration mechanism. This is necessary because Kubelet is
-        # responsible for issuing CSI NodeGetInfo, NodeStageVolume, NodePublishVolume calls. The
-        # node-driver-registrar registers your CSI driver with Kubelet so that it knows which Unix
-        # domain socket to issue the CSI calls on.
-        - name: csi-node-driver-registrar
-          image: registry.k8s.io/sig-storage/csi-node-driver-registrar:v2.10.0
-          args:
-            - --v=5
-            - --csi-address=/csi/csi.sock
-            - --kubelet-registration-path=/var/lib/kubelet/plugins/$(CSI_DRIVER)/csi.sock
           securityContext:
-            # This is necessary only for systems with SELinux, where non-privileged sidecar containers
-            # cannot access unix domain socket created by privileged CSI driver container.
             privileged: true
+          volumeMounts:
+            - mountPath: /csi
+              name: socket-dir
+            - mountPath: /var/lib/kubelet/
+              name: mountpoint-dir
+              mountPropagation: "Bidirectional"
+            - mountPath: /etc/kubernetes/
+              name: hpe-cred
+            - mountPath: /dev
+              name: host-dev
+          resources:
+            limits:
+              cpu: 1
+              memory: 200Mi
+            requests:
+              cpu: 10m
+              memory: 20Mi
+        - name: liveness-probe
+          volumeMounts:
+            - mountPath: /csi
+              name: socket-dir
+          image: registry.k8s.io/sig-storage/livenessprobe:v2.14.0
+          imagePullPolicy: IfNotPresent
+          args:
+            - --csi-address=/csi/csi.sock
+            - --probe-timeout=120s
+            - --health-port=29763
+            - --v=2
+          resources:
+            limits:
+              cpu: 100m
+              memory: 100Mi
+            requests:
+              cpu: 10m
+              memory: 20Mi
+        - name: node-driver-registrar
+          image: registry.k8s.io/sig-storage/csi-node-driver-registrar:v2.12.0
+          imagePullPolicy: IfNotPresent
+          args:
+            - --csi-address=$(ADDRESS)
+            - --kubelet-registration-path=$(DRIVER_REG_SOCK_PATH)
+            - --v=2
+          livenessProbe:
+            exec:
+              command:
+                - /csi-node-driver-registrar
+                - --kubelet-registration-path=$(DRIVER_REG_SOCK_PATH)
+                - --mode=kubelet-registration-probe
+            initialDelaySeconds: 30
+            timeoutSeconds: 15
           env:
-            - name: CSI_DRIVER
-              value: lustre-csi
-            - name: KUBE_NODE_NAME
-              valueFrom:
-                fieldRef:
-                  apiVersion: v1
-                  fieldPath: spec.nodeName
+            - name: ADDRESS
+              value: /csi/csi.sock
+            - name: DRIVER_REG_SOCK_PATH
+              value: /var/lib/kubelet/plugins/lustre-csi.hpe.com/csi.sock
           volumeMounts:
             - name: socket-dir
               mountPath: /csi
             - name: registration-dir
               mountPath: /registration
-
+          resources:
+            limits:
+              cpu: 100m
+              memory: 100Mi
+            requests:
+              cpu: 10m
+              memory: 20Mi
       volumes:
-        # This volume is where the socket for the kubelet->driver communication is done.
-        - name: socket-dir
-          hostPath:
-            path: /var/lib/kubelet/plugins/lustre-csi
+        - hostPath:
+            path: /var/lib/kubelet/plugins/lustre-csi.hpe.com
             type: DirectoryOrCreate
-        # This volume is where the driver mounts volumes. Must be set to Bidirectional to allow kubelet on the host to see mounts created by the CSI driver container.
-        - name: mountpoint-dir
-          hostPath:
-            path: /var/lib/kubelet/pods
+          name: socket-dir
+        - hostPath:
+            path: /var/lib/kubelet/plugins_registry/
             type: Directory
-        # This volume is where the node-driver-registrar registers the plugin with kubelet
-        - name: registration-dir
-          hostPath:
-            path: /var/lib/kubelet/plugins_registry
+          name: registration-dir
+        - hostPath:
+            path: /var/lib/kubelet/
             type: Directory
-        - name: plugins-dir
-          hostPath:
-            path: /var/lib/kubelet/plugins
-            type: Directory
-        - name: dev-dir
-          hostPath:
+          name: mountpoint-dir
+        - hostPath:
+            path: /etc/kubernetes/
+            type: DirectoryOrCreate
+          name: hpe-cred
+        - hostPath:
             path: /dev
             type: Directory
-        - name: mnt-dir
-          hostPath:
-            path: /mnt
-            type: Directory
+          name: host-dev

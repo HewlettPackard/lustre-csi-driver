@@ -92,6 +92,31 @@ The following old steps can be used if this project is ever disassociated from t
 4. Go to [GitHub releases](https://github.com/HewlettPackard/lustre-csi-driver/releases) and **Draft a New Release**
 5. Use the `tag` corresponding to the release and fill out Title/Features/Bugfixes/etc.
 
+## Local Testing, Without a Real Lustre Filesystem
+
+The PV's `.spec.csi.volumeHandle` should refer to a Lustre nid, per usual. Then, commandline arguments may be specified to tell the driver to mount a local filesystem instead of the Lustre filesystem. This swap of volume arguments will happen immediately prior to calling into the `mount` library routine.
+
+For example, maybe on the node where the CSI driver is running, and where the example application will run, there is an XFS filesystem on `/dev/vdb` which is not yet mounted. Edit the DaemonSet to add the `--swap-source-*` commandline arguments to the `csi-node-driver` container:
+
+```console
+kubectl edit ds -n lustre-csi-system lustre-csi-node
+```
+
+Note the `--swap-source-from` argument matches the `.spec.csi.volumeHandle` specified in the PV, and that the local XFS filesystem which is not yet mounted is on `/dev/vdb`. This is a DaemonSet, so these args will apply to all nodes:
+
+```yaml
+      containers:
+      - args:
+        - -v=5
+        - --endpoint=$(CSI_ENDPOINT)
+        - --nodeid=$(KUBE_NODE_NAME)
+        - --swap-source-from=10.1.1.113@tcp:/lushtx
+        - --swap-source-to=/dev/vdb
+        - --swap-source-to-fstype=xfs
+```
+
+The application will refer to the original PV which specifies the Lustre nid, but will end up with the /dev/vdb XFS filesystem mounted, instead.
+
 ## Read-Only Mount
 
 When considering read-only mounts, recall that on a single host, Linux does not allow the same volume to be mounted "rw" on one mountpoint and "ro" on another mountpoint.

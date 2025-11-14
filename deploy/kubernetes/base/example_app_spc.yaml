@@ -1,0 +1,23 @@
+kind: Pod
+apiVersion: v1
+metadata:
+  name: app-example
+spec:
+  securityContext:
+    # This "spc_t" is the "super privilege container" type, part of
+    # MCS (Multi Category Security). In this case, we use it to tell the
+    # container engine (CRI-O) to not relabel the /mnt/lus volume prior to
+    # making the container ready.
+    seLinuxOptions:
+      type: "spc_t"
+  containers:
+  - name: busybox
+    image: busybox:1.34.1
+    command: [ "sleep", "100000000" ]
+    volumeMounts:
+      - name: lustre-volume
+        mountPath: /mnt/lus
+  volumes:
+    - name: lustre-volume
+      persistentVolumeClaim:
+        claimName: pvc-example # defined in pvc.yaml
