@@ -63,7 +63,6 @@ hpelustre: hpelustre-direct
 # hpelustre-direct is called by the Dockerfile.
 .PHONY: hpelustre-direct
 hpelustre-direct:
-	LDFLAGS="-X ${PKG}/pkg/hpelustre.driverVersion=${VERSION} -s -w -extldflags '-static'" \
 	CGO_ENABLED=0 GOOS=linux GOARCH=$(ARCH) go build -a -ldflags="-X '$(PKG)/pkg/hpelustre.driverVersion=$(VERSION)' -s -w -extldflags -static" -mod vendor -o bin/hpelustreplugin ./pkg/hpelustreplugin
 
 .PHONY: docker-build

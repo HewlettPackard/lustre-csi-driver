@@ -222,6 +222,8 @@ func getVolume(volumeID string, context map[string]string) (*lustreVolume, error
 	return &lustreVolume{}, nil
 }
 
+// The original getVolume(). It's attempting to interpret more complex volume
+// references. Not currently in use.
 func xx_getVolume(volumeID string, context map[string]string) (*lustreVolume, error) {
 	volName := ""
 
