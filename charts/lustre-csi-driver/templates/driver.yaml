@@ -4,7 +4,6 @@ metadata:
   # This name must match the name of the CSI SP, found in service/service.go.
   # Then any PV may reference this in its own spec.csi.driver.
   name: lustre-csi.hpe.com
-  namespace: lustre-csi-system
   labels:
     app.kubernetes.io/instance: lustre-csi.hpe.com
     app.kubernetes.io/part-of: lustre-csi-driver
@@ -12,6 +11,8 @@ metadata:
     app.kubernetes.io/component: csi-driver
     app.kubernetes.io/version: {{ .Values.deployment.tag }}
 spec:
+  fsGroupPolicy: File
+
   # Indicates this CSI volume driver requires an attachment operation because it implements the CSI
   # ControllerPublishVolume() method, and that the Kubernetes attach/detach controller should call
   # the attachment volume interface (which checks the volumeAttach status) and waits until the volume
@@ -27,4 +28,4 @@ spec:
   #    "csi.storage.k8s.io/pod.namespace": pod.Namespace
   #    "csi.storage.k8s.io/pod.uid": string(pod.UID)
   #    "csi.storage.k8s.io/ephemeral": "true" (or "false")
-  podInfoOnMount: false
+  podInfoOnMount: true
