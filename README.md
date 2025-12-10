@@ -4,9 +4,9 @@
 - [Features](#features)
 - [Kubernetes Compatibility Matrix](#kubernetes-compatibility-matrix)
 - [Deployment](#deployment)
-  * [Helm](#helm)
-  * [Kubernetes](#kubernetes)
-  * [Kind](#kind)
+  - [Helm](#helm)
+  - [Kubernetes](#kubernetes)
+  - [Kind](#kind)
 - [Usage](#usage)
 
 ## Overview
@@ -22,11 +22,9 @@ frameworks to mount and unmount Lustre filesystems to/from containers in their p
 
 ## Kubernetes Compatibility Matrix
 
-| Lustre CSI Driver / Kubernetes Version | v1.13-1.18 | v1.25 | v1.27 | v1.28-v1.29 | v1.32
-|----------------------------------------|------------|-------|-------|------|-----
-| v0.0.10 | yes | yes | yes
-| v0.1.0  |     |     |     | yes | yes
-
+| Lustre CSI Driver / Kubernetes Version | v1.29-v1.34
+|----------------------------------------|------------
+| v0.1.8+  | yes
 
 ## Deployment
 
@@ -35,39 +33,46 @@ This describes methods of deploying the Lustre CSI driver in various environment
 ### Helm
 
 You can use Helm to manage the lustre CSI driver components:
+
+- To pick a release: `git tag`. Then pick a tag with `git checkout $RELEASE_TAG`
 - To deploy: `cd charts/ && helm install lustre-csi-driver lustre-csi-driver/ --values lustre-csi-driver/values.yaml`
 - To shut down: `helm delete lustre-csi-driver`
 
+For a development build, to install a specific image tag, use the following:
+
+- `helm install lustre-csi-driver lustre-csi-driver/ --values lustre-csi-driver/values.yaml --set deployment.tag=0.0.0.126-4fee`
+
 ### Kubernetes
 
-Deployment uses [Kustomize](https://kustomize.io/) to configure the deployment YAMLs in the [kustomization base](https://kubernetes.io/docs/tasks/manage-kubernetes-objects/kustomization/#bases-and-overlays) 
+Deployment uses [Kustomize](https://kustomize.io/) to configure the deployment YAMLs in the [kustomization base](https://kubernetes.io/docs/tasks/manage-kubernetes-objects/kustomization/#bases-and-overlays)
 [deploy/kubernetes/base](./deploy/kubernetes/base).
+
 - To deploy using the Makefile: `make deploy`
 - To undeploy using the Makefile: `make undeploy`
 
 To deploy a specific [overlay](./deploy/kubernetes/overlays):
-- `make deploy OVERLAY=overlays/<overlay>`
 
-Otherwise, you can just use the pre-built .yaml files in [deploy/kubernetes](./deploy/kubernetes):
-- `kubectl apply -k 'https://github.com/HewlettPackard/lustre-csi-driver.git/deploy/kubernetes/overlays/kind/?ref=master'`
+- `make deploy OVERLAY=overlays/<overlay>`
 
 ### Kind
 
 This assumes your [Kind](https://kind.sigs.k8s.io/) environment is already set up and ready for a deployment.
 A Kind [kustomization overlay](https://kubernetes.io/docs/tasks/manage-kubernetes-objects/kustomization/#bases-and-overlays) is defined by the YAMLs in [deploy/kubernetes/overlays/kind](./deploy/kubernetes/overlays/kind).
+
 - To deploy using the Makefile: `make kind-push && make kind-deploy`
 - To undeploy using the Makefile: `make kind-undeploy`
 
 ## Usage
 
-This section provides examples for consuming a Lustre filesystem via a Kubernetes [PersistentVolume](https://kubernetes.io/docs/concepts/storage/persistent-volumes/) 
-(PV) and [PersistentVolumeClaim](https://kubernetes.io/docs/concepts/storage/persistent-volumes/#lifecycle-of-a-volume-and-claim) (PVC), 
-and finally an example of using the PVC in a simple application deployed as a Pod. 
+This section provides examples for consuming a Lustre filesystem via a Kubernetes [PersistentVolume](https://kubernetes.io/docs/concepts/storage/persistent-volumes/)
+(PV) and [PersistentVolumeClaim](https://kubernetes.io/docs/concepts/storage/persistent-volumes/#lifecycle-of-a-volume-and-claim) (PVC),
+and finally an example of using the PVC in a simple application deployed as a Pod.
 
 It assumed that a Lustre filesystem is already created, and that the Lustre CSI
 driver is deployed on your Kubernetes cluster wherever the application pods are running (see [Deployment](#deployment) for instructions).
 
 Inspect the `example_*.yaml` Kubernetes resources under [deploy/kubernetes/base](./deploy/kubernetes/base), then:
+
 1. Update [example_pv.yaml](./deploy/kubernetes/base/example_pv.yaml)'s `volumeHandle` value to the NID list of your Lustre filesystem's MGS.
 2. Deploy the PV:  `kubectl apply -f deploy/kubernetes/base/example_pv.yaml`
 3. Deploy the PVC: `kubectl apply -f deploy/kubernetes/base/example_pvc.yaml`
@@ -76,9 +81,63 @@ Inspect the `example_*.yaml` Kubernetes resources under [deploy/kubernetes/base]
 
 ## Steps for Releasing a Version
 
+To perform a release, please use the tools and documentation described in [Releasing NNF Software](https://nearnodeflash.github.io/latest/repo-guides/release-nnf-sw/release-all/#nnf-software-overview). The steps and tools in that guide will ensure that the new release is properly configured to self-identify and to package properly with new releases of the NNF software stack.
+
+The following old steps can be used if this project is ever disassociated from the NNF software stack:
+
 1. Checkout the project at the commit you wish to release
 2. Create a local annotated tag: `git tag -a <tag> -m <message>`
-4. Push this tag to remote: `git push origin <tag>`
+3. Push this tag to remote: `git push origin <tag>`
    - This will trigger a package build with the `<tag>` version
-5. Go to [GitHub releases](https://github.com/HewlettPackard/lustre-csi-driver/releases) and **Draft a New Release**
-6. Use the `tag` corresponding to the release and fill out Title/Features/Bugfixes/etc.
+4. Go to [GitHub releases](https://github.com/HewlettPackard/lustre-csi-driver/releases) and **Draft a New Release**
+5. Use the `tag` corresponding to the release and fill out Title/Features/Bugfixes/etc.
+
+## Local Testing, Without a Real Lustre Filesystem
+
+The PV's `.spec.csi.volumeHandle` should refer to a Lustre nid, per usual. Then, commandline arguments may be specified to tell the driver to mount a local filesystem instead of the Lustre filesystem. This swap of volume arguments will happen immediately prior to calling into the `mount` library routine.
+
+For example, maybe on the node where the CSI driver is running, and where the example application will run, there is an XFS filesystem on `/dev/vdb` which is not yet mounted. Edit the DaemonSet to add the `--swap-source-*` commandline arguments to the `csi-node-driver` container:
+
+```console
+kubectl edit ds -n lustre-csi-system lustre-csi-node
+```
+
+Note the `--swap-source-from` argument matches the `.spec.csi.volumeHandle` specified in the PV, and that the local XFS filesystem which is not yet mounted is on `/dev/vdb`. This is a DaemonSet, so these args will apply to all nodes:
+
+```yaml
+      containers:
+      - args:
+        - -v=5
+        - --endpoint=$(CSI_ENDPOINT)
+        - --nodeid=$(KUBE_NODE_NAME)
+        - --swap-source-from=10.1.1.113@tcp:/lushtx
+        - --swap-source-to=/dev/vdb
+        - --swap-source-to-fstype=xfs
+```
+
+The application will refer to the original PV which specifies the Lustre nid, but will end up with the /dev/vdb XFS filesystem mounted, instead.
+
+## Read-Only Mount
+
+When considering read-only mounts, recall that on a single host, Linux does not allow the same volume to be mounted "rw" on one mountpoint and "ro" on another mountpoint.
+
+Details:
+
+- Pod `.spec.volumes[].persistentVolumeClaim.readOnly`:
+  Volume is mounted with "ro" mount option. This affects all containers in the pod. CRI-O knows it's read-only and doesn't attempt the selinux relabel.
+
+- Pod `.spec.containers[].volumeMounts[].readOnly`:
+  Volume is mounted with "rw" mount option. But it's read-only in this individual container.
+
+- PV `.spec.csi.readOnly`:
+  This is passed to the ControllerPublishVolumeRequest endpoint in the CSI driver. This CSI driver does not support this endpoint.
+
+- PV `.spec.mountOptions`
+  Additional mount options. Supported with csi, iscsi, and nfs. If "ro" is specified, then the volume is mounted with "ro" mount option. CRI-O doesn't know it's read-only and wants to do the selinux relabel, but cannot write to the volume, and it fails to setup the container.
+
+- PVC does not have an equivalent of PV's `.spec.mountOptions`.
+
+- PV `.spec.accessModes` does not control or constrain the mount options. This is used to
+advise the k8s scheduler about pod placement.
+
+- PVC `.spec.accessModes` is loosely used to match a PV. The PV access mode is what matters.
