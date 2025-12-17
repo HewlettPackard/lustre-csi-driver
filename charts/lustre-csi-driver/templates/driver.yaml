@@ -11,7 +11,7 @@ metadata:
     app.kubernetes.io/component: csi-driver
     app.kubernetes.io/version: {{ .Values.deployment.tag }}
 spec:
-  fsGroupPolicy: File
+  fsGroupPolicy: None
 
   # Indicates this CSI volume driver requires an attachment operation because it implements the CSI
   # ControllerPublishVolume() method, and that the Kubernetes attach/detach controller should call
