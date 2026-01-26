@@ -190,7 +190,7 @@ Example *Dockerfile*:
 COPY . /opt/app-root/src
 WORKDIR /opt/app-root/src
 ```
-In the following section we show two methods for how this *Dockerfile* can be used. For the *Binary source* build option, this Dockerfile is copied into the root of the Lustre source tree (i.e. /lustre-release/) where the docker build startegy automatically detects and applies the file. Alternatively, for the git source build it is executed as a inline dockerfile. 
+In the following section we show two methods for how this *Dockerfile* can be used. For the *Binary source* build option, this Dockerfile is copied into the root of the Lustre source tree (i.e. /lustre-release/) where the docker build strategy automatically detects and applies the file. Alternatively, for the git source build it is executed as a inline dockerfile. 
 
 *NOTE:* Verify you’re in the “openshift-kmm” namespace prior to creating the build image: `oc project openshift-kmm` 
 
