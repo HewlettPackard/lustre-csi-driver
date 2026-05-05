@@ -1,4 +1,4 @@
-# Copyright 2021-2025 Hewlett Packard Enterprise Development LP
+# Copyright 2021-2026 Hewlett Packard Enterprise Development LP
 # Other additional copyright holders may be indicated within.
 #
 # The entirety of this work is licensed under the Apache License,
@@ -100,9 +100,55 @@ kind-undeploy: undeploy_overlay
 
 installer: kustomize edit-image helm-version
 
+# Update the application version in the helm chart.
+# This expects only one helm chart to exist at a time.
 helm-version: VERSION ?= $(shell cat .version)
-helm-version: .version ## Updates the Helm values.yaml with new version
-	yq e -i ".deployment.tag=\"$(VERSION)\"" charts/lustre-csi-driver/values.yaml
+helm-version: CHART_VERSION ?= $(shell /bin/ls -d1 charts/v*)
+helm-version: .version ## Updates the Helm values.yaml with new version.
+	if [[ `/bin/ls -d1 charts/v* | wc -l | tr -d ' '` != 1 ]]; then \
+		echo "Expecting only one chart version."; \
+		exit 1; \
+	fi
+	yq e -i ".deployment.tag=\"$(VERSION)\"" $(CHART_VERSION)/lustre-csi-driver/values.yaml
+
+# Update the chart version in the helm chart. Use this if the chart version
+# has changed, prior to using the 'helm-repackage' and 'helm-reindex' targets.
+# This expects only one helm chart to exist at a time.
+helm-chart-version: CHART_VERSION ?= $(shell /bin/ls -d1 charts/v*)
+helm-chart-version:
+	if [[ `/bin/ls -d1 charts/v* | wc -l | tr -d ' '` != 1 ]]; then \
+		echo "Expecting only one chart version."; \
+		exit 1; \
+	fi
+	export NEW_VER=`echo "$(CHART_VERSION)" | sed 's,charts/v,,'`; \
+	yq e -i ".version=\"$$NEW_VER\"" $(CHART_VERSION)/lustre-csi-driver/Chart.yaml
+
+# Reindex the charts/index.yaml. Use this if the chart version has changed or
+# if the application version has changed.
+# Use the 'helm-chart-version' and 'helm-repackage' targets for any new
+# chart prior to running this 'helm-reindex' target.
+# This expects only one helm chart to exist at a time.
+helm-reindex: CHART_BRANCH ?= master
+helm-reindex:
+	if [[ `/bin/ls -d1 charts/v* | wc -l | tr -d ' '` != 1 ]]; then \
+		echo "Expecting only one chart version."; \
+		exit 1; \
+	fi
+	helm repo index charts/ --url https://raw.githubusercontent.com/HewlettPackard/lustre-csi-driver/$(CHART_BRANCH)/charts
+
+# Repackage the chart. Use this if the chart version has changed
+# or if the application version has changed.
+# Use the 'helm-chart-version' target for any new chart prior to running this
+# 'helm-repackage' target.
+# This expects only one helm chart to exist at a time.
+helm-repackage: CHART_VERSION ?= $(shell /bin/ls -d1 charts/v*)
+helm-repackage:
+	if [[ `/bin/ls -d1 charts/v* | wc -l | tr -d ' '` != 1 ]]; then \
+		echo "Expecting only one chart version."; \
+		exit 1; \
+	fi
+	git rm -f $(CHART_VERSION)/lustre-csi-driver-*.tgz
+	helm package $(CHART_VERSION)/lustre-csi-driver -d $(CHART_VERSION)
 
 # Let .version be phony so that a git update to the workarea can be reflected
 # in it each time it's needed.
