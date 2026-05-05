@@ -1,0 +1,20 @@
+apiVersion: v1
+entries:
+  lustre-csi-driver:
+  - apiVersion: v2
+    appVersion: "1.0"
+    created: "2026-05-05T15:24:13.260352-05:00"
+    description: Container Storage Interface (CSI) driver for static provisioning
+      of Lustre filesystems
+    digest: 75f6bf1989919ad7c7ad9743e59afe19ee321f65c227c7655ca65b6b76e39ac8
+    home: https://github.com/HewlettPackard/lustre-csi-driver
+    keywords:
+    - lustre
+    - lustre-fs
+    - lustre-csi
+    name: lustre-csi-driver
+    type: application
+    urls:
+    - https://raw.githubusercontent.com/HewlettPackard/lustre-csi-driver/chart-restructure/charts/v0.0.4/lustre-csi-driver-0.0.4.tgz
+    version: 0.0.4
+generated: "2026-05-05T15:24:13.259319-05:00"
