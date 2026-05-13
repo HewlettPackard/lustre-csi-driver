@@ -23,6 +23,9 @@ IMAGE_TAG_BASE ?= ghcr.io/hewlettpackard/lustre-csi-driver
 
 CHART_DIR ?= charts
 
+SHELL := /bin/bash
+.SHELLFLAGS := -eu -o pipefail -c
+
 # Tell Kustomize to deploy the default config, or an overlay.
 # To use the 'kind' overlay:
 #   export KUBECONFIG=/my/kubeconfig.file
@@ -100,7 +103,7 @@ undeploy: undeploy_overlay
 kind-undeploy: OVERLAY=overlays/kind
 kind-undeploy: undeploy_overlay
 
-installer: kustomize edit-image helm-version
+installer: kustomize edit-image helm-app-version
 
 .PHONY: helm-one-chart
 helm-one-chart:
@@ -110,7 +113,6 @@ helm-one-chart:
 	fi
 
 # Update the application version in the helm chart.
-# This expects only one helm chart to exist at a time.
 # Use this prior to using the 'helm-reindex' and 'helm-repackage' targets.
 # This expects only one helm chart to exist at a time.
 .PHONY: helm-app-version
