@@ -40,7 +40,7 @@ You can use Helm to manage the lustre CSI driver components, installing from you
 
 For a development build, to install a specific image tag, use the following:
 
-- `helm install lustre-csi-driver lustre-csi-driver/ --values lustre-csi-driver/values.yaml --set deployment.tag=0.0.0.126-4fee`
+- `helm install lustre-csi-driver v0.0.4/lustre-csi-driver/ --values v0.0.4/lustre-csi-driver/values.yaml --set deployment.tag=0.0.0.126-4fee`
 
 #### Helm chart repo
 

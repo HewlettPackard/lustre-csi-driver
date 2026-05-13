@@ -7,7 +7,7 @@ Kubernetes resources.
 
 ## To deploy from this workarea:
 
-- To deploy directly from this workarea: `cd charts/ && helm install lustre-csi-driver lustre-csi-driver/ --values lustre-csi-driver/values.yaml`
+- To deploy directly from this workarea: `cd charts/ && helm install lustre-csi-driver v0.0.4/lustre-csi-driver/ --values v0.0.4/lustre-csi-driver/values.yaml`
 - To shut down: `helm delete lustre-csi-driver`
 
 ### To deploy from a github repo
