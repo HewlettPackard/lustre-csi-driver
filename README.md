@@ -181,14 +181,14 @@ type: Opaque
 data: {{ range \$key, \$value := .data }}
   {{ \$key }}: {{ \$value }} {{ end }}
 EOF
-$ oc get secret etc-pki-entitlement -n openshift-config-managed -o=go-template-file --template=secret-template.txt | oc apply -f
+$ oc get secret etc-pki-entitlement -n openshift-config-managed -o=go-template-file --template=secret-template.txt | oc apply -n openshift-kmm -f -
 ```
 
 ### Create Builder Image:
 Builder images are created using 2 primary commands: `oc new-build` and `oc start-build`. Where `new-build` generates a BuildConfig used in `start-build` to define and create an image it pushes to registry: `image-registry.openshift-image-registry.svc:5000/<namespace>/<image-name>:<tag>`. In our case, the image will be packaged with the Lustre source code and all required build dependencies. The Driver ToolKit (DTK) is an ideal base image for our purposes and comes packaged with commonly required dependencies to build or install kernel modules. To define a DTK as the base image we will need to leverage the docker build strategy and provide a *Dockerfile*:
 
 Example *Dockerfile*:
-```yaml
+```dockerfile
     # DTK build image for OpenShift 4.X (RHEL 8) latest:
     FROM registry.redhat.io/openshift4/driver-toolkit-rhel8:latest
 
@@ -227,7 +227,7 @@ There are multiple ways to include application source into a build image. Below,
       - Copy *Dockerfile* (from previous section) into the root of the Lustre project (lustre-release).
       - Create new BuildConfig and configure it to take binary source as input utilizing the docker strategy. 
          ```console
-         oc new-build --binary --name= <build-name> -n openshift-kmm --strategy=docker
+         oc new-build --binary --name=<build-name> -n openshift-kmm --strategy=docker
          ```
       - Start build: 
          - update with build directory containing lustre source:
@@ -279,13 +279,13 @@ data:
     WORKDIR /opt/app-root/src
     
     # Configure and build Lustre RPMs
-    # NOTE: Uncomment --with-o2ib if using InfiniBand
+    # NOTE: Add --with-o2ib to the configure command if using InfiniBand
     RUN ./configure \
         --with-linux=/lib/modules/${KERNEL_VERSION}/build \
         --with-linux-obj=/lib/modules/${KERNEL_VERSION}/build \
         --disable-server \
         --disable-tests \
-        --enable-client \
+        --enable-client
         # --with-o2ib
     
     # Build RPMs
