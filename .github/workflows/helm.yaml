@@ -1,0 +1,28 @@
+name: Helm chart checks
+
+on:
+  pull_request:
+    types: [closed]
+    branches:
+      - master
+      - releases/v*
+
+jobs:
+
+  helm_on_pr_merge_master:
+    if: github.event.pull_request.merged == true && github.event.pull_request.base.ref == 'master'
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v5
+    - name: One chart version
+      run: make helm-one-chart
+
+  helm_on_pr_merge_release:
+    if: github.event.pull_request.merged == true && startsWith(github.event.pull_request.base.ref, 'releases/v')
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v5
+    - name: One chart version
+      run: make helm-one-chart CHART_DIR=chart-releases
