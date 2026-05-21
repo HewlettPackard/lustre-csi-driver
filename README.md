@@ -32,15 +32,37 @@ This describes methods of deploying the Lustre CSI driver in various environment
 
 ### Helm
 
-You can use Helm to manage the lustre CSI driver components:
+You can use Helm to manage the lustre CSI driver components, installing from your local workarea rather than using a chart repo:
 
 - To pick a release: `git tag`. Then pick a tag with `git checkout $RELEASE_TAG`
-- To deploy: `cd charts/ && helm install lustre-csi-driver lustre-csi-driver/ --values lustre-csi-driver/values.yaml`
+- To deploy: `cd charts/ && helm install lustre-csi-driver v0.0.4/lustre-csi-driver/ --values v0.0.4/lustre-csi-driver/values.yaml`
 - To shut down: `helm delete lustre-csi-driver`
 
 For a development build, to install a specific image tag, use the following:
 
-- `helm install lustre-csi-driver lustre-csi-driver/ --values lustre-csi-driver/values.yaml --set deployment.tag=0.0.0.126-4fee`
+- `cd charts/ && helm install lustre-csi-driver v0.0.4/lustre-csi-driver/ --values v0.0.4/lustre-csi-driver/values.yaml --set deployment.tag=0.0.0.126-4fee`
+
+#### Helm chart repo
+
+NOTE: The master branch places the charts in the charts/ directory. The release branch will own the chart-releases/ directory.
+
+After any change to the `charts/` directory, the chart package and index must be regenerated. If this branch is then pushed to github, this allows github to be used as a chart repo.
+
+When modifying the chart, bump the chart version with the following steps:
+
+- Move the current chart version dir, following semantic versioning rules: `git mv charts/v0.0.4 charts/v0.0.5`.
+- Update the chart version to match in its Chart.yaml file: `make helm-chart-version`
+- Repackage the chart: `make helm-repackage`
+- Reindex the chart: `make helm-reindex`
+- Commit the changes.
+
+Assuming that is merged to 'master', you can point at it with:
+
+```console
+helm repo add lustre-csi-driver https://raw.githubusercontent.com/HewlettPackard/lustre-csi-driver/master/charts
+```
+
+See [charts/README.md](charts/README.md) for more information regarding the use of helm charts in master versus release branches.
 
 ### Kubernetes
 
@@ -141,3 +163,4 @@ Details:
 advise the k8s scheduler about pod placement.
 
 - PVC `.spec.accessModes` is loosely used to match a PV. The PV access mode is what matters.
+
