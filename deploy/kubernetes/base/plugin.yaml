@@ -7,6 +7,8 @@ metadata:
     app.kubernetes.io/part-of: lustre-csi-driver
     app.kubernetes.io/name: lustre-csi-node
     app.kubernetes.io/component: plugin
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/version: v0.0.4
 spec:
   selector:
     matchLabels:
@@ -27,14 +29,19 @@ spec:
         app.kubernetes.io/component: plugin
     spec:
       priorityClassName: system-node-critical
+      securityContext:
+        seccompProfile:
+          type: RuntimeDefault
       initContainers:
         # When the CSI Driver hard crashes, it can leave around the socket used for communication between
         # the driver and the registrar, causing future driver executables to fail as the unix socket is
         # already in use (listen unix /csi/csi.sock: bind: address already in use). To combat this, we
         # cleanup the socket, if present, on container init.
         - name: init-socket
-          image: busybox:1.34.1
+          image: busybox:1.36.1
           command: ['sh', '-c', 'rm -f /csi/csi.sock']
+          securityContext:
+            allowPrivilegeEscalation: false
           volumeMounts:
             - name: socket-dir
               mountPath: /csi
@@ -96,6 +103,10 @@ spec:
             - --probe-timeout=120s
             - --health-port=29763
             - --v=2
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            runAsNonRoot: true
           resources:
             limits:
               cpu: 100m
@@ -114,7 +125,8 @@ spec:
             exec:
               command:
                 - /csi-node-driver-registrar
-                - --kubelet-registration-path=$(DRIVER_REG_SOCK_PATH)
+                # Env var substitution is not supported in exec probes; path is hardcoded.
+                - --kubelet-registration-path=/var/lib/kubelet/plugins/lustre-csi.hpe.com/csi.sock
                 - --mode=kubelet-registration-probe
             initialDelaySeconds: 30
             timeoutSeconds: 15
@@ -123,6 +135,10 @@ spec:
               value: /csi/csi.sock
             - name: DRIVER_REG_SOCK_PATH
               value: /var/lib/kubelet/plugins/lustre-csi.hpe.com/csi.sock
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            runAsNonRoot: true
           volumeMounts:
             - name: socket-dir
               mountPath: /csi
