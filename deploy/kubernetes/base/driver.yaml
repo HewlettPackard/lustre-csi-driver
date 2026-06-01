@@ -10,7 +10,7 @@ metadata:
     app.kubernetes.io/name: lustre-csi.hpe.com
     app.kubernetes.io/component: csi-driver
     app.kubernetes.io/managed-by: kustomize
-    app.kubernetes.io/version: v0.0.4
+    app.kubernetes.io/version: master
 spec:
   fsGroupPolicy: None
 

@@ -8,7 +8,7 @@ metadata:
     app.kubernetes.io/name: lustre-csi-node
     app.kubernetes.io/component: plugin
     app.kubernetes.io/managed-by: kustomize
-    app.kubernetes.io/version: v0.0.4
+    app.kubernetes.io/version: master
 spec:
   selector:
     matchLabels:
