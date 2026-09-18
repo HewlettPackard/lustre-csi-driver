@@ -8,6 +8,11 @@
   - [Kubernetes](#kubernetes)
   - [Kind](#kind)
 - [Usage](#usage)
+- [Steps for Releasing a Version](#steps-for-releasing-a-version)
+- [Local Testing, Without a Real Lustre Filesystem](#local-testing-without-a-real-lustre-filesystem)
+- [Read-Only Mount](#read-only-mount)
+- [OpenShift Lustre Client Install](#openshift-lustre-client-install)
+- [CSI NodeStageVolume vs NodePublishVolume](#csi-nodestagevolume-vs-nodepublishvolume)
 
 ## Overview
 
@@ -420,3 +425,17 @@ If you're using InfiniBand in your OpenShift cluster you'll also need to configu
              trap : TERM INT
              while true; do sleep 3600; done
    ```
+
+## CSI NodeStageVolume vs NodePublishVolume
+
+Ideally, this is the situation: The host mount happens once, and from there, it's bind-mounted into each container's namespace. However, this driver does not support NodeStageVolume, so it does the host mount once per pod.
+
+To have the host mount happen only once requires that it happen at NodeStageVolume. This CSI driver does not support this. (See the comment on NodeStageVolume() in pkg/hpelustre/nodeserver.go about a potential kubelet issue. This is inherited from the upstream azurelustre-csi-driver.) So, this driver mounts the volume on the host for each pod (pod, not container).
+
+Here's the flow, from deep-diving into kubelet, CRI-O, and crun:
+
+- kubelet issues NodeStageVolume+NodePublishVolume. These have to mount the volume on the host. If StageVolume is supported, then it's mounted in the "global device path". The NodePublishVolume will mount the volume in the per-pod kubelet root; if NodeStageVolume is supported, then this can be a bind mount.
+- CRI-O builds the container configuration, including a description of the necessary mounts. It does not do the mounts and does not talk to CSI.
+- crun builds the container and does the bind mounts from the pod's kubelet root to the container namespace. It does not talk to CSI.
+
+CSI drivers never need to do their own ref counting, whether or not NodeStageVolume is supported. The teardown of containers, including their bind mounts, happens as a normal part of destroying a container. When kubelet sees that a pod is no longer being used, it does a NodeUnpublishVolume to unmount from the per-pod kubelet root. When kubelet sees that no pods are using the volume, it does a NodeUnstageVolume from the global device path.
